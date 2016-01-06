@@ -17,44 +17,28 @@ void MinecraftInterface::initInterface(int argc, char *argv[], std::string modpa
   std::cout << "Initializing" << std::endl;
   char * name = const_cast<char*>("game.py");
   Py_SetProgramName(name);
-	Py_Initialize();
-	PySys_SetArgv(argc, argv);	
+  Py_Initialize();
+  PySys_SetArgv(argc, argv);	
+
+  std::string path = "import sys\nsys.path.append('" + modpath + "')\n";
+  PyRun_SimpleString(path.c_str());
 	
-	std::string paths[] = {
-	   modpath,
-	   "/home/trevor/Documents/dev/anaconda2/lib/python27.zip",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/plat-linux2",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/lib-tk",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/lib-old",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/lib-dynload",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/site-packages/Sphinx-1.3.1-py2.7.egg",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/site-packages/setuptools-18.8.1-py2.7.egg",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/site-packages",
-	   "/home/trevor/Documents/dev/anaconda2/lib/python2.7/site-packages/cryptography-1.0.2-py2.7-linux-x86_64.egg"
-	};
-	
-	for (int p = 0; p < 11; p++) {
-	  std::string path = "import sys\nsys.path.append('" + paths[p] + "')\n";
-	  PyRun_SimpleString(path.c_str());
-	}
-	
-	std::cout << "Paths set" << std::endl;
-	
+  std::cout << "Paths set" << std::endl;
+
   PyObject *pModuleName = PyString_FromString(moduleName);
-	module = PyImport_Import(pModuleName);
+  module = PyImport_Import(pModuleName);
   if (module != nullptr) {
-	  initMethods();
-	} else {
-	  PyErr_Print(); 
-	  exit(1); 
-	}
-	Py_DECREF(pModuleName);
+    initMethods();
+  } else {
+    PyErr_Print(); 
+    exit(1); 
+  }
+  Py_DECREF(pModuleName);
 }
 
 
 void MinecraftInterface::initMethods() {
-	py_init = PyObject_GetAttrString(module, "init");
+  py_init = PyObject_GetAttrString(module, "init");
   if (!py_init || !PyCallable_Check(py_init)) {
     PyErr_Print();
   }
@@ -79,7 +63,7 @@ void MinecraftInterface::initMethods() {
     PyErr_Print();
   }
   
-	py_reset = PyObject_GetAttrString(module, "reset");
+  py_reset = PyObject_GetAttrString(module, "reset");
   if (!py_reset || !PyCallable_Check(py_reset)) {
     PyErr_Print();
   }
@@ -165,7 +149,7 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
 
           tmp.at<cv::Vec3b>(r, c) = cv::Vec3b((uchar)PyInt_AsLong(bl),
                                               (uchar)PyInt_AsLong(gr),
-                                           	  (uchar)PyInt_AsLong(rd));
+                                              (uchar)PyInt_AsLong(rd));
         }
                 
         i+=channels;
