@@ -16,9 +16,10 @@ class DeepMindPlayer(Player):
 
 
     def doAction(self, actionIndex):
+        #print ("DeepMindPlayer doAction: ", actionIndex)
         act = self.actions[actionIndex]
         # carry out the action
-        self.performAction(act)   
+        return self.performAction(act)   
             
 
 

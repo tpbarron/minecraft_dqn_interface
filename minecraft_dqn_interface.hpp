@@ -1,5 +1,5 @@
-#ifndef __INTERFACE_H__
-#define __INTERFACE_H__
+#ifndef __MINECRAFT_INTERFACE_H__
+#define __MINECRAFT_INTERFACE_H__
 
 #include <vector>
 
@@ -8,12 +8,12 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-class Interface {
+class MinecraftInterface {
 
 public:
 
-  Interface(int argc, char *argv[], std::string path);
-  ~Interface();
+  MinecraftInterface(int argc, char *argv[], const std::string path);
+  ~MinecraftInterface();
 
   /* use virtual otherwise linker will try to perform static linkage */
   virtual void initInterface(int argc, char *argv[], std::string path);

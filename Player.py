@@ -199,6 +199,13 @@ class Player:
                 
     # Perform an action by setting the agent's movement fields to the values from the action object
     def performAction(self, a):        
+        #print ("Player perform action")
+        #print ("Action: ", a.forwardbackward_walk, a.leftright_walk, a.leftright_rotation, a.updown_rotation, a.break_block)
+        #print (self.position)
+        #print (self.rotation)
+        #print (self.looking)
+        #print (self.strafe)
+        
         # Initialize a new reward for this current action
         reward = STARTING_REWARD
         
@@ -215,6 +222,11 @@ class Player:
         self.looking[0] = a.leftright_rotation
         self.looking[1] = a.updown_rotation
         
+        #print (self.position)
+        #print (self.rotation)
+        #print (self.looking)
+        #print (self.strafe)
+        
         # Try to break a block at the crosshairs
         # Returns either the type of block broken/tried to break or None for no blocks in range
         if a.break_block:
@@ -228,7 +240,7 @@ class Player:
         return reward
     
     
-    def getDecision(self, frame):
-        a = Action.getRandomAction()
-        self.performAction(a)
+#    def getDecision(self, frame):
+#        a = Action.getRandomAction()
+#        self.performAction(a)
         

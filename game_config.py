@@ -60,24 +60,24 @@ STARTING_REWARD = SWING_PENALTY + EXISTENCE_PENALTY
 ################
 # Game Actions #
 ################
-LEGAL_ACTIONS = [0,1,2,3,4,5,6,7,8,9]
+LEGAL_ACTIONS = [0, 1, 2, 3, 7, 10] #, 19, 20, 21, 22]
 
 GAME_ACTIONS = [
-    #0  (break_block, updown_rot, leftright_rot, forwardback, leftright)
+    #  (break_block, updown_rot, leftright_rot, forwardback, leftright)
     
-    #1  Do nothing
+    #0  Do nothing
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=0),
 
-    #2  Go forward
+    #1  Go forward
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=WALKING_SPEED, leftright=0),
     
-    #3  Go backward
+    #2  Go backward
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=-WALKING_SPEED, leftright=0),
     
-    #4  Rotate right
+    #3  Rotate right
     Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
     
-    #5  Rotate right and go forward
+    #4  Rotate right and go forward
     Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
     #6  Rotate right and go backward

@@ -1,6 +1,7 @@
 from game import *
 from game_config import *
 from game_globals import *
+import time
 
 window = None
 itrCount = 0
@@ -10,17 +11,29 @@ def init():
     Initialize the game state
     """
     global window
-    window = Window(width=VIEW_WINDOW_SIZE, height=VIEW_WINDOW_SIZE, caption='Minecraft', resizable=True, vsync=False)
+    window = Window(width=VIEW_WINDOW_SIZE, height=VIEW_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
     p = DeepMindPlayer()
     window.set_player(p)
     p.setGame(window)
     world_file = "/test%d.txt" % random.randrange(10)
     generateGameWorld(world_file)
     window.model.loadMap(world_file)
-    setup()
+    opengl_setup()
     return "Successfully initialized"
 
 
+
+def step():
+    global window
+    pyglet.clock.tick()
+    screen = window.update(100)  # fake ms of time pass
+    window.switch_to()
+    window.dispatch_events()
+    window.dispatch_event('on_draw')
+    window.flip()
+    return screen
+    
+    
 def get_action_set():
     """
     Get a list of all the legal actions
@@ -35,13 +48,7 @@ def get_screen():
     # do one step 
     global itrCount 
     itrCount += 1  
-    pyglet.clock.tick()
-    #TODO: keep track of actual time
-    screen = window.update(10)  # fake ms of time pass
-    window.switch_to()
-    window.dispatch_events()
-    window.dispatch_event('on_draw')
-    window.flip()
+    screen = step()
     #print len(list(screen))
     #print list(screen)
     return list(screen)
@@ -51,9 +58,10 @@ def act(action):
     """
     Perform the desired action
     """
-    print "Performing action ", action
-    return window.player.doAction(action)
-
+    global window
+    #print "Performing action ", action
+    return window.player.doAction(action) 
+    
 
 def is_game_over():
     """
@@ -68,6 +76,7 @@ def reset():
     Reset the game state
     """
     global itrCount
+    global window
     itrCount = 0
     window.reset()
     
@@ -81,6 +90,10 @@ if __name__ == "__main__":
         over = is_game_over()
         if (over):
             reset()
+        else:
+            #pass
+            act(3)
         i += 1
+        #time.sleep(2)
               
 

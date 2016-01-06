@@ -1,16 +1,19 @@
 #include "minecraft_dqn_interface.hpp"
 
 #include <iostream>
+#include <chrono>
+#include <thread>
 
-Interface::Interface(int argc, char *argv[], std::string path) {
+MinecraftInterface::MinecraftInterface(int argc, char *argv[], const std::string path) {
   initInterface(argc, argv, path);
 }
 
-Interface::~Interface() {
+MinecraftInterface::~MinecraftInterface() {
   Py_Finalize();
 }
 
-void Interface::initInterface(int argc, char *argv[], std::string modpath) {
+
+void MinecraftInterface::initInterface(int argc, char *argv[], std::string modpath) {
   std::cout << "Initializing" << std::endl;
   char * name = const_cast<char*>("game.py");
   Py_SetProgramName(name);
@@ -50,7 +53,7 @@ void Interface::initInterface(int argc, char *argv[], std::string modpath) {
 }
 
 
-void Interface::initMethods() {
+void MinecraftInterface::initMethods() {
 	py_init = PyObject_GetAttrString(module, "init");
   if (!py_init || !PyCallable_Check(py_init)) {
     PyErr_Print();
@@ -86,7 +89,7 @@ void Interface::initMethods() {
 /*
  * Initialize the python game
  */
-void Interface::init() {
+void MinecraftInterface::init() {
   std::cout << "initing" << std::endl;
   PyObject *pValue = PyObject_CallObject(py_init, nullptr);
   PyErr_Print();
@@ -100,7 +103,7 @@ void Interface::init() {
 /*
  * Get the set of possible actions as a list of integers
  */
-std::vector<int> Interface::get_action_set() {
+std::vector<int> MinecraftInterface::get_action_set() {
   std::vector<int> actions;
 
   PyObject *pValue = PyObject_CallObject(py_get_action_set, nullptr);
@@ -132,10 +135,10 @@ std::vector<int> Interface::get_action_set() {
  * Converts the returned byte array into a cv::Mat
  */
 
-cv::Mat Interface::get_screen() {
+cv::Mat MinecraftInterface::get_screen() {
   return get_screen(0, 0);
 } 
-cv::Mat Interface::get_screen(int gitr, int fitr) {
+cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
   PyObject *pValue = PyObject_CallObject(py_get_screen, nullptr);
   cv::Mat tmp;
   
@@ -186,7 +189,7 @@ cv::Mat Interface::get_screen(int gitr, int fitr) {
 /*
  * Perform the action designated by the id
  */
-int Interface::act(int action) {
+int MinecraftInterface::act(int action) {
   // parameter must be tuple
   // https://docs.python.org/2.0/ext/buildValue.html
   PyObject *pAction = Py_BuildValue("(i)", action);
@@ -206,7 +209,7 @@ int Interface::act(int action) {
 /*
  * Return true if the current game has ended
  */
-bool Interface::is_game_over() {
+bool MinecraftInterface::is_game_over() {
   PyObject *pValue = PyObject_CallObject(py_is_game_over, nullptr);
   bool ret = true;
   if(PyBool_Check(pValue)) {
@@ -220,13 +223,14 @@ bool Interface::is_game_over() {
 /*
  * Reset the state of the game to the starting state
  */
-void Interface::reset() {
+void MinecraftInterface::reset() {
   PyObject_CallObject(py_reset, nullptr);
 }
 
-
+/*
 int main(int argc, char *argv[]) {
-  Interface iface(argc, argv, "");	
+  MinecraftInterface iface(argc, argv, "");	
+//  MinecraftInterface iface;	
   iface.init();
   iface.get_action_set();
   iface.act(0);
@@ -240,9 +244,13 @@ int main(int argc, char *argv[]) {
       std::cout << "Finished game " << gameItr << ". Resetting..." << std::endl;
       iface.reset();
       gameItr++;
+    } else {
+      iface.act(3);
     }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     frameItr++;
   }
   
   return 0;
 }
+*/
