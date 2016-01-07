@@ -57,9 +57,12 @@ EXISTENCE_PENALTY = 0
 # If you get all the penalties, then you get zero
 STARTING_REWARD = SWING_PENALTY + EXISTENCE_PENALTY
 
-################
-# Game Actions #
-################
+#################################################
+# Game Actions 
+#
+# The interface using the legal action list for training. Define your actions 
+# below and update the legal actions array to define which ones are valid
+################################################
 LEGAL_ACTIONS = [0, 1, 2, 3, 7, 10] #, 19, 20, 21, 22]
 
 GAME_ACTIONS = [
@@ -155,8 +158,8 @@ def generateTower(locations, texture):
     
     return locations
     
+
 def generateFlatWorld(locations):
-    
     # Make the flat ground
     for i in range(-WORLD_WIDTH, WORLD_WIDTH):
         for j in range(-WORLD_DEPTH, WORLD_DEPTH):
@@ -172,6 +175,11 @@ def generateFlatWorld(locations):
             locations.append((j, i, WORLD_DEPTH, "STONE"))
     return locations
 
+
+#####################################
+# This function gets call mid game
+# Implement it to define your task
+#####################################
 def generateGameWorld(filename):
     locs = []
     locs = generateFlatWorld(locs)
