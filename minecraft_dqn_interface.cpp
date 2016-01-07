@@ -4,7 +4,9 @@
 #include <chrono>
 #include <thread>
 
-MinecraftInterface::MinecraftInterface(int argc, char *argv[], const std::string path) {
+MinecraftInterface::MinecraftInterface(int argc, 
+				       char *argv[], 
+				       const std::string path) {
   initInterface(argc, argv, path);
 }
 
@@ -22,7 +24,7 @@ void MinecraftInterface::initInterface(int argc, char *argv[], std::string modpa
 
   std::string path = "import sys\nsys.path.append('" + modpath + "')\n";
   PyRun_SimpleString(path.c_str());
-	
+  //PyRun_SimpleString("import sys\nprint(sys.path)");
   std::cout << "Paths set" << std::endl;
 
   PyObject *pModuleName = PyString_FromString(moduleName);
