@@ -17,7 +17,7 @@ SCALED_WINDOW_SIZE = 84
 TICKS_PER_SEC = 6000
 
 # Total number of game frames per episode
-MAXIMUM_GAME_FRAMES = 100
+MAXIMUM_GAME_FRAMES = 300
 
 # Agent's turning speed (per tick)
 AGENT_ROTATION_SPEED = 1.50
@@ -31,7 +31,7 @@ NUMBER_BRICK_BLOCKS = 7 # number of brick blocks to add randomly through world
 MAX_BLOCK_HEIGHT = 5 # The maximum height of blocks placed in the world
 
 # How often to print out the total number of frames 
-COUNTER_DISPLAY_FREQUENCY = 1000
+#COUNTER_DISPLAY_FREQUENCY = 1000
 
 # GPU Training, -1 is CPU and 0 is GPU
 #GPU = 0
@@ -63,7 +63,7 @@ STARTING_REWARD = SWING_PENALTY + EXISTENCE_PENALTY
 # The interface using the legal action list for training. Define your actions 
 # below and update the legal actions array to define which ones are valid
 ################################################
-LEGAL_ACTIONS = [0, 1, 2, 3, 7, 10] #, 19, 20, 21, 22]
+LEGAL_ACTIONS = [0, 1, 2, 3, 7, 10] #, 19, 20, 21]
 
 GAME_ACTIONS = [
     #  (break_block, updown_rot, leftright_rot, forwardback, leftright)
@@ -83,55 +83,55 @@ GAME_ACTIONS = [
     #4  Rotate right and go forward
     Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
-    #6  Rotate right and go backward
+    #5  Rotate right and go backward
     Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
     
-    #7  Rotate left
+    #6  Rotate left
     Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
 
-    #8  Rotate left and go forward
+    #7  Rotate left and go forward
     Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
-    #9  Rotate left and go backward
+    #8  Rotate left and go backward
     Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
         
-    #10 Click
+    #9 Click
     Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=0),
     
-    #11 Click and go forward
+    #10 Click and go forward
     Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=1, leftright=0),
     
-    #12 Click and go backward
+    #11 Click and go backward
     Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=-1, leftright=0),
     
-    #13 Click and rotate right
+    #12 Click and rotate right
     Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
     
-    #14 Click and rotate right and go forward
+    #13 Click and rotate right and go forward
     Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
-    #15 Click and rotate right and go backward
+    #14 Click and rotate right and go backward
     Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
 
-    #16 Click and rotate left
+    #15 Click and rotate left
     Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
     
-    #17 Click and rotate left and go forward
+    #16 Click and rotate left and go forward
     Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
 
-    #18 Click and rotate left and go backward
+    #17 Click and rotate left and go backward
     Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
 
-    #19 Go right
+    #18 Go right
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=WALKING_SPEED),
     
-    #20 Go left
+    #29 Go left
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=-WALKING_SPEED),
 
-    #21 Rotate up
+    #20 Rotate up
     Action.Action(False, updown_rot=AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0),
     
-    #22 Rotate down
+    #21 Rotate down
     Action.Action(False, updown_rot=-AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0)
 ]
 
