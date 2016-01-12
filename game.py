@@ -431,8 +431,7 @@ class Window(pyglet.window.Window):
         PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
         
         # Initialize an array to store the screenshot pixels
-        # Add two extra bytes on the end: one for reward and one for terminal flag
-        screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height + 2))(0)
+        screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)
         
         # Grab a screenshot
         # Use GL_RGB for color and GL_LUMINANCE for grayscale!

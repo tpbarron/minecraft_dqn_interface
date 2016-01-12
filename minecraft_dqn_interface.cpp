@@ -118,9 +118,40 @@ std::vector<int> MinecraftInterface::get_action_set() {
 
 /*
  * Update the game state and get the current screen
+ * as a vector of pixel values
+ */
+std::shared_ptr<std::array<uint8_t, 7056> > MinecraftInterface::get_screen_as_array() {
+  PyObject *pValue = PyObject_CallObject(py_get_screen, nullptr);
+  auto screen = std::make_shared< std::array<uint8_t, 7056> >();
+
+  // assuming we have a list 
+  if (PyList_Check(pValue)) {
+    int width = 84, height = 84;
+
+    for (int i = 0; i < width * height; ++i) {
+      PyObject *v = PyList_GetItem(pValue, i); // get the item at index i
+      (*screen)[i] = (uint8_t)PyInt_AsLong(v); // at the item to the vector
+      Py_DECREF(v);
+    }
+  } else {
+    // if we didn't get a list from the python game
+    // try to get a message about what was wrong
+    PyErr_Print();
+  }
+
+  //for (int i = 0; i < 7056; ++i) {
+  //  std::cout << (unsigned int)((*screen)[i]) << " ";
+  //}
+  //std::cout << std::endl;
+
+  Py_DECREF(pValue);
+  return screen;
+}
+
+/*
+ * Update the game state and get the current screen
  * Converts the returned byte array into a cv::Mat
  */
-
 cv::Mat MinecraftInterface::get_screen() {
   return get_screen(0, 0);
 } 
@@ -136,11 +167,10 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
     tmp.create(width, height, CV_8UC3);
     for (int r = 0; r < height; r++) {
       for (int c = 0; c < width; c++) {
-      
-        if (channels == 1) {
+	//if (channels == 1) {
           PyObject *v = PyList_GetItem(pValue, i);
           tmp.at<uchar>(r, c) = (uchar)PyInt_AsLong(v);
-        } else {         
+	  /*} else {         
           PyObject *rd = PyList_GetItem(pValue, i);
           PyObject *gr = PyList_GetItem(pValue, i+1);
           PyObject *bl = PyList_GetItem(pValue, i+2);
@@ -152,23 +182,24 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
           tmp.at<cv::Vec3b>(r, c) = cv::Vec3b((uchar)PyInt_AsLong(bl),
                                               (uchar)PyInt_AsLong(gr),
                                               (uchar)PyInt_AsLong(rd));
-        }
+					      }*/
                 
         i+=channels;
       }
     }    
-  }         
-  
-  cv::Mat screen;
-  // flip over the x axis
-  cv::flip(tmp, screen, 0);
-  
-  std::string file = "screens/image" + std::to_string(gitr) + "_" + std::to_string(fitr) + ".png";
-  //std::cout << "file = " << file << std::endl;
-  cv::imwrite(file, screen);
+  }
 
+  //cv::Mat screen;
+  // flip over the x axis
+  //cv::flip(tmp, screen, 0);
+
+  //std::string file = "screens/image" + std::to_string(gitr) + "_" + std::to_string(fitr) + ".png";
+  //std::cout << "file = " << file << std::endl;
+  //cv::imwrite(file, screen);
+  
   Py_DECREF(pValue);
-  return screen;
+  //return screen;
+  return tmp;
 }
 
 
@@ -183,11 +214,11 @@ int MinecraftInterface::act(int action) {
   int ret = 0;
   if (PyInt_Check(pValue)) {
     ret = (int)PyInt_AsLong(pValue);
+  } else {
+    PyErr_Print();
   }
-  
   Py_DECREF(pAction);
   Py_DECREF(pValue);
-  
   return ret;
 }
 

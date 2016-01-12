@@ -34,7 +34,7 @@ MAX_BLOCK_HEIGHT = 5 # The maximum height of blocks placed in the world
 COUNTER_DISPLAY_FREQUENCY = 1000
 
 # GPU Training, -1 is CPU and 0 is GPU
-GPU = 0
+#GPU = 0
 
 ##############
 # Game rules #
@@ -45,7 +45,7 @@ GPU = 0
 
 # How much do you get for breaking different blocks?
 BLOCK_BREAK_REWARDS = {
-    "GRASS":100,
+    "GRASS":1,
     "STONE":0,
     "BRICK":0
 }
@@ -135,10 +135,10 @@ GAME_ACTIONS = [
     Action.Action(False, updown_rot=-AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0)
 ]
 
+
 ###############
 # Build World #
 ###############
-
 GROUND = -2
 WALL_HEIGHT = 2
 
@@ -177,7 +177,7 @@ def generateFlatWorld(locations):
 
 
 #####################################
-# This function gets call mid game
+# This function gets called mid game
 # Implement it to define your task
 #####################################
 def generateGameWorld(filename):
