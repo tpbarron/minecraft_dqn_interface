@@ -1,4 +1,4 @@
-import math
+import math, os
 
 ##########################################################################
 # Game specific parameters
@@ -61,7 +61,8 @@ def tex_coords(top, bottom, side):
     return result
 
 
-MINECRAFT_PATH = '/home/trevor/Documents/dev/ml/research/reinforcement/minecraft/'
+MINECRAFT_PATH = os.path.dirname(os.path.realpath(__file__)) + '/'
+#'dependencies/minecraft_dqn_interface/'
 TEXTURE_PATH = MINECRAFT_PATH + 'texture.png'
 MAPS_PATH = MINECRAFT_PATH + 'maps'
 
