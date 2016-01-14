@@ -429,15 +429,17 @@ class Window(pyglet.window.Window):
             self._update(dt / m)
 
         PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
-        
         # Initialize an array to store the screenshot pixels
         screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)
-        
         # Grab a screenshot
         # Use GL_RGB for color and GL_LUMINANCE for grayscale!
         #glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot)
         glReadPixels(0, 0, self.width, self.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, screenshot)
-        
+        #image = Image.fromstring(mode="L", size=(self.width, self.height),
+        #                         data=screenshot)
+        #image.show()
+        #raw_input("Enter")
+
         self.current_frame = screenshot
         return screenshot
         
@@ -696,9 +698,9 @@ def opengl_setup():
     setup_fog()
     
     # Setup grayscale conversion color component scaling values
-    #glPixelTransferf(GL_RED_SCALE, 0.299)
-    #glPixelTransferf(GL_GREEN_SCALE, 0.587)
-    #glPixelTransferf(GL_BLUE_SCALE, 0.114)
+    glPixelTransferf(GL_RED_SCALE, 0.299)
+    glPixelTransferf(GL_GREEN_SCALE, 0.587)
+    glPixelTransferf(GL_BLUE_SCALE, 0.114)
 
 """
 

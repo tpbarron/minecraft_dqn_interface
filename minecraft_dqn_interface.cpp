@@ -1,3 +1,4 @@
+
 #include "minecraft_dqn_interface.hpp"
 
 #include <iostream>
@@ -37,7 +38,6 @@ void MinecraftInterface::initInterface(int argc, char *argv[], std::string modpa
   }
   Py_DECREF(pModuleName);
 }
-
 
 void MinecraftInterface::initMethods() {
   py_init = PyObject_GetAttrString(module, "init");
@@ -164,12 +164,12 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
     int width = 84, height = 84;
     int channels = 1;
     int i = 0;
-    tmp.create(width, height, CV_8UC3);
+    tmp.create(width, height, CV_8UC1);
     for (int r = 0; r < height; r++) {
       for (int c = 0; c < width; c++) {
 	//if (channels == 1) {
           PyObject *v = PyList_GetItem(pValue, i);
-          tmp.at<uchar>(r, c) = (uchar)PyInt_AsLong(v);
+          tmp.at<uchar>(r, c) = static_cast<uchar>(PyInt_AsLong(v));
 	  /*} else {         
           PyObject *rd = PyList_GetItem(pValue, i);
           PyObject *gr = PyList_GetItem(pValue, i+1);
@@ -196,7 +196,12 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
   //std::string file = "screens/image" + std::to_string(gitr) + "_" + std::to_string(fitr) + ".png";
   //std::cout << "file = " << file << std::endl;
   //cv::imwrite(file, screen);
-  
+
+
+  //cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
+  //cv::imshow( "Display window", screen );                   // Show our image inside it.
+  //cv::waitKey(0);                                          // Wait for a keystroke in the window
+
   Py_DECREF(pValue);
   //return screen;
   return tmp;
