@@ -12,9 +12,9 @@ from game_globals import *
 VIEW_WINDOW_SIZE = 84
 
 # The width and height of the image sent to DeepMind
-SCALED_WINDOW_SIZE = 84
+#SCALED_WINDOW_SIZE = 84
 
-TICKS_PER_SEC = 6000
+#TICKS_PER_SEC = 6000
 
 # Total number of game frames per episode
 MAXIMUM_GAME_FRAMES = 300
@@ -63,7 +63,7 @@ STARTING_REWARD = SWING_PENALTY + EXISTENCE_PENALTY
 # The interface using the legal action list for training. Define your actions 
 # below and update the legal actions array to define which ones are valid
 ################################################
-LEGAL_ACTIONS = [0, 1, 2, 3, 7, 10] #, 19, 20, 21]
+LEGAL_ACTIONS = [0, 1, 2, 3, 4, 5, 6]
 
 GAME_ACTIONS = [
     #  (break_block, updown_rot, leftright_rot, forwardback, leftright)
@@ -80,58 +80,58 @@ GAME_ACTIONS = [
     #3  Rotate right
     Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
     
-    #4  Rotate right and go forward
-    Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
+    #-4  Rotate right and go forward
+    #Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
-    #5  Rotate right and go backward
-    Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
+    #-5  Rotate right and go backward
+    #Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
     
-    #6  Rotate left
+    #4  Rotate left
     Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
 
-    #7  Rotate left and go forward
-    Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
+    #-7  Rotate left and go forward
+    #Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
-    #8  Rotate left and go backward
-    Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
+    #-8  Rotate left and go backward
+    #Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
         
-    #9 Click
-    Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=0),
+    #-9 Click
+    #Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=0),
     
     #10 Click and go forward
-    Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=1, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=1, leftright=0),
     
     #11 Click and go backward
-    Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=-1, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=0.0, forwardback=-1, leftright=0),
     
     #12 Click and rotate right
-    Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
     
     #13 Click and rotate right and go forward
-    Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
     
     #14 Click and rotate right and go backward
-    Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
 
     #15 Click and rotate left
-    Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=0, leftright=0),
     
     #16 Click and rotate left and go forward
-    Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=1, leftright=0),
 
     #17 Click and rotate left and go backward
-    Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
+    #Action.Action(True, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
 
     #18 Go right
-    Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=WALKING_SPEED),
+    #Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=WALKING_SPEED),
     
-    #29 Go left
-    Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=-WALKING_SPEED),
+    #19 Go left
+    #Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=-WALKING_SPEED),
 
-    #20 Rotate up
+    #5 Rotate up
     Action.Action(False, updown_rot=AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0),
     
-    #21 Rotate down
+    #6 Rotate down
     Action.Action(False, updown_rot=-AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0)
 ]
 
@@ -176,16 +176,47 @@ def generateFlatWorld(locations):
     return locations
 
 
+def generateWalkwayWorld(locations):    
+    # a block to start on
+    locations.append((0, GROUND, 0, "STONE"))
+  
+    # Make a snaking walkway
+    i = 0
+    j = 0
+    block_count = 0
+    while block_count < 100:
+        locations.append((i, GROUND, j, "STONE"))
+        #if random.random() < 0.1:
+        #    locations.append((i, GROUND+1, j, "GRASS"))
+        new_i = random.randrange(i-1, i+2)
+        if new_i != i:
+            locations.append((new_i, GROUND, j, "STONE"))
+        j = j-1           
+        i = new_i
+        block_count += 1
+
+    return locations
+    
+    
+def generateShortEasyWalkwayWorld(locations):    
+    # a block to start on
+    locations.append((0, GROUND, 0, "STONE"))
+    for i in range(10):
+      locations.append((0, GROUND, -i, "STONE"))
+
+    return locations
+
 #####################################
 # This function gets called mid game
 # Implement it to define your task
 #####################################
 def generateGameWorld(filename):
     locs = []
-    locs = generateFlatWorld(locs)
-    for i in range(NUMBER_GRASS_BLOCKS):
-        locs = generateTower(locs, "GRASS")
-    for i in range(NUMBER_BRICK_BLOCKS):
-        locs = generateTower(locs, "BRICK")
+    locs = generateShortEasyWalkwayWorld(locs)
+#    locs = generateFlatWorld(locs)
+#    for i in range(NUMBER_GRASS_BLOCKS):
+#        locs = generateTower(locs, "GRASS")
+#    for i in range(NUMBER_BRICK_BLOCKS):
+#        locs = generateTower(locs, "BRICK")
     saveWorld(locs, filename)
 

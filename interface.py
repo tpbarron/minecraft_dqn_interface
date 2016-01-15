@@ -25,8 +25,8 @@ def init():
 
 def step():
     global window
-    pyglet.clock.tick()
-    screen = window.update(100)  # fake ms of time pass
+    dt = pyglet.clock.tick()
+    screen = window.update(dt * 1000)
     window.switch_to()
     window.dispatch_events()
     window.dispatch_event('on_draw')
@@ -47,8 +47,10 @@ def get_screen():
     """
     # do one step 
     global itrCount 
-    itrCount += 1  
+    itrCount += 1
     screen = step()
+    #print ("py screen")
+    #print screen
     #print len(list(screen))
     #print list(screen)
     return list(screen)
@@ -68,7 +70,7 @@ def is_game_over():
     Determine if the game is over
     """
     global itrCount
-    return itrCount >= MAXIMUM_GAME_FRAMES
+    return itrCount >= MAXIMUM_GAME_FRAMES or window.player.endGameEarly()
 
 
 def reset():
@@ -91,8 +93,8 @@ if __name__ == "__main__":
         if (over):
             reset()
         else:
-            #pass
-            act(3)
+            pass
+            #act(3)
         i += 1
         #time.sleep(2)
               

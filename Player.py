@@ -54,9 +54,14 @@ class Player:
         
         self.total_score = 0
         
+        self.prev_max_z = 0
+        self.should_end_game = False
+
         assert STARTING_REWARD >= EXISTENCE_PENALTY + SWING_PENALTY, "Penalties too high!"
 
 
+    def endGameEarly(self):
+        return self.should_end_game
 
     def setGame(self, game):
         self.game = game
@@ -77,7 +82,7 @@ class Player:
         dx = math.cos(math.radians(x - 90)) * m
         dz = math.sin(math.radians(x - 90)) * m
         return (dx, dy, dz)
-    
+
     def canJump(self):
         height = PLAYER_HEIGHT
         pad = 0.25
@@ -200,11 +205,6 @@ class Player:
     # Perform an action by setting the agent's movement fields to the values from the action object
     def performAction(self, a):        
         #print ("Player perform action")
-        #print ("Action: ", a.forwardbackward_walk, a.leftright_walk, a.leftright_rotation, a.updown_rotation, a.break_block)
-        #print (self.position)
-        #print (self.rotation)
-        #print (self.looking)
-        #print (self.strafe)
         
         # Initialize a new reward for this current action
         reward = STARTING_REWARD
@@ -217,23 +217,31 @@ class Player:
         # E.g. Breaking blocks might be good or bad; reward or penalty
         
         self.strafe[0] = a.forwardbackward_walk
-        self.strafe[1] = a.leftright_walk
+        #self.strafe[1] = a.leftright_walk
         
         self.looking[0] = a.leftright_rotation
         self.looking[1] = a.updown_rotation
-        
+
+        # Check if farther than before. Then give reward.
+        # Going away in the z dir is negative.
+        # by rounding, the max score should be the z dist of the path
         #print (self.position)
-        #print (self.rotation)
-        #print (self.looking)
-        #print (self.strafe)
-        
+        if (round(self.position[2]) < self.prev_max_z):
+          self.prev_max_z = round(self.position[2])
+          reward += 1
+
+        if (self.position[1] < -1):
+          # the player fell, end the game early
+          self.should_end_game = True
+          reward = 0 #-1
+
         # Try to break a block at the crosshairs
         # Returns either the type of block broken/tried to break or None for no blocks in range
-        if a.break_block:
-            reward -= SWING_PENALTY
-            block_type = self.simulate_click()
-            if block_type != "":
-                reward += BLOCK_BREAK_REWARDS[block_type]
+        #if a.break_block:
+        #    reward -= SWING_PENALTY
+        #    block_type = self.simulate_click()
+        #    if block_type != "":
+        #        reward += BLOCK_BREAK_REWARDS[block_type]
 
         self.previous_reward = reward
         self.total_score += reward

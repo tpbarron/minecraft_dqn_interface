@@ -60,7 +60,6 @@ def tex_coords(top, bottom, side):
     result.extend(side * 4)
     return result
 
-
 MINECRAFT_PATH = os.path.dirname(os.path.realpath(__file__)) + '/'
 #'dependencies/minecraft_dqn_interface/'
 TEXTURE_PATH = MINECRAFT_PATH + 'texture.png'
