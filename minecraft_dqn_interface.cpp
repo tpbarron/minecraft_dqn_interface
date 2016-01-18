@@ -169,7 +169,7 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
       for (int c = 0; c < width; c++) {
 	//if (channels == 1) {
           PyObject *v = PyList_GetItem(pValue, i);
-          tmp.at<uchar>(r, c) = static_cast<uchar>(PyInt_AsLong(v));
+          tmp.at<uint8_t>(r, c) = static_cast<uint8_t>(PyInt_AsLong(v));
 	  /*} else {         
           PyObject *rd = PyList_GetItem(pValue, i);
           PyObject *gr = PyList_GetItem(pValue, i+1);
@@ -224,6 +224,7 @@ int MinecraftInterface::act(int action) {
   }
   Py_DECREF(pAction);
   Py_DECREF(pValue);
+  //std::cout << "minecraft interface reward = " << ret << std::endl;
   return ret;
 }
 

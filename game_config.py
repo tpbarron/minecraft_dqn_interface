@@ -14,10 +14,10 @@ VIEW_WINDOW_SIZE = 84
 # The width and height of the image sent to DeepMind
 #SCALED_WINDOW_SIZE = 84
 
-#TICKS_PER_SEC = 6000
+TICKS_PER_SEC = 6000
 
 # Total number of game frames per episode
-MAXIMUM_GAME_FRAMES = 300
+MAXIMUM_GAME_FRAMES = 500
 
 # Agent's turning speed (per tick)
 AGENT_ROTATION_SPEED = 1.50
@@ -184,7 +184,7 @@ def generateWalkwayWorld(locations):
     i = 0
     j = 0
     block_count = 0
-    while block_count < 100:
+    while block_count < 10:
         locations.append((i, GROUND, j, "STONE"))
         #if random.random() < 0.1:
         #    locations.append((i, GROUND+1, j, "GRASS"))
@@ -201,8 +201,8 @@ def generateWalkwayWorld(locations):
 def generateShortEasyWalkwayWorld(locations):    
     # a block to start on
     locations.append((0, GROUND, 0, "STONE"))
-    for i in range(10):
-      locations.append((0, GROUND, -i, "STONE"))
+    for i in range(100):
+        locations.append((0, GROUND, -i, "STONE"))
 
     return locations
 
@@ -212,7 +212,7 @@ def generateShortEasyWalkwayWorld(locations):
 #####################################
 def generateGameWorld(filename):
     locs = []
-    locs = generateShortEasyWalkwayWorld(locs)
+    locs = generateWalkwayWorld(locs)
 #    locs = generateFlatWorld(locs)
 #    for i in range(NUMBER_GRASS_BLOCKS):
 #        locs = generateTower(locs, "GRASS")

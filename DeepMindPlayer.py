@@ -15,12 +15,17 @@ class DeepMindPlayer(Player):
         self.actions = game_config.GAME_ACTIONS
 
 
-    def doAction(self, actionIndex):
+    def performAction(self, actionIndex):
         #print ("DeepMindPlayer doAction: ", actionIndex)
         act = self.actions[actionIndex]
         # carry out the action
-        return self.performAction(act)   
-            
+        return self.performActionPlayer(act)   
+    
+    def getReward(self, actionIndex):      
+        #print ("DeepMindPlayer doAction: ", actionIndex)
+        act = self.actions[actionIndex]
+        # carry out the action
+        return self.getRewardPlayer(act)   
 
 
 

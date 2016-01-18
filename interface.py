@@ -20,18 +20,6 @@ def init():
     window.model.loadMap(world_file)
     opengl_setup()
     return "Successfully initialized"
-
-
-
-def step():
-    global window
-    dt = pyglet.clock.tick()
-    screen = window.update(dt * 1000)
-    window.switch_to()
-    window.dispatch_events()
-    window.dispatch_event('on_draw')
-    window.flip()
-    return screen
     
     
 def get_action_set():
@@ -45,10 +33,7 @@ def get_screen():
     """
     Do one step of the game state and get the current screen
     """
-    # do one step 
-    global itrCount 
-    itrCount += 1
-    screen = step()
+    screen = window.get_screen()
     #print ("py screen")
     #print screen
     #print len(list(screen))
@@ -60,26 +45,46 @@ def act(action):
     """
     Perform the desired action
     """
+    #print ("python act 1")
     global window
     #print "Performing action ", action
-    return window.player.doAction(action) 
+    # first apply the action
+    window.player.performAction(action)
+    #print ("python act 2")
+    update()
+    #print ("python act 3")
+    # now determine the reward from it
+    return window.player.getReward(action)
+
+
+def update():
+    """ 
+    Updates the game given the currently set params
+    Called from act.
+    """
+    global window
+    dt = pyglet.clock.tick()
+    window.update(dt * 1000)
+    window.switch_to()
+    window.dispatch_events()
+    window.dispatch_event('on_draw')
+    window.flip()
     
 
 def is_game_over():
     """
     Determine if the game is over
     """
-    global itrCount
-    return itrCount >= MAXIMUM_GAME_FRAMES or window.player.endGameEarly()
+    return window.game_over or window.player.endGameEarly()
 
 
 def reset():
     """
     Reset the game state
     """
-    global itrCount
+    #global itrCount
     global window
-    itrCount = 0
+    #itrCount = 0
     window.reset()
     
     
@@ -91,11 +96,13 @@ if __name__ == "__main__":
         #cv2.imwrite("image.png", img)
         over = is_game_over()
         if (over):
+            print ("Resetting game")
             reset()
         else:
-            pass
-            #act(3)
+            #pass
+            r = act(2)
+            print ("reward = ", r)
         i += 1
-        #time.sleep(2)
+        time.sleep(.05)
               
 

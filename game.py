@@ -356,12 +356,12 @@ class Window(pyglet.window.Window):
         #pyglet.clock.schedule_interval(self.update, 1.0 / TICKS_PER_SEC)
         #pyglet.clock.schedule(self.update)
 
-        self.current_frame = [[.76, .67],[.88, .91]]
+        #self.current_frame = [[.76, .67],[.88, .91]]
         
         # Int flag to indicate the end of the game
         # This is set to 1 whenever the max frames are reached
         # or the player dies
-        self.game_over = 0
+        self.game_over = False
         
     def reset(self):
         # Setup grayscale conversion color component scaling values
@@ -374,7 +374,7 @@ class Window(pyglet.window.Window):
         self.exclusive = False
         self.sector = None
         self.reticle = None
-        self.game_over = 0
+        self.game_over = False
         self.player = DeepMindPlayer()
         self.player.setGame(self)
         world_file = "test%d.txt" % random.randrange(10)
@@ -414,7 +414,7 @@ class Window(pyglet.window.Window):
      
         self.world_counter += 1
         if self.world_counter >= MAXIMUM_GAME_FRAMES:
-            self.game_over = 1
+            self.game_over = True
      
         self.model.process_queue()
         sector = sectorize(self.player.position)
@@ -427,21 +427,6 @@ class Window(pyglet.window.Window):
         dt = min(dt, 0.2)
         for _ in xrange(m):
             self._update(dt / m)
-
-        PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
-        # Initialize an array to store the screenshot pixels
-        screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)
-        # Grab a screenshot
-        # Use GL_RGB for color and GL_LUMINANCE for grayscale!
-        #glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot)
-        glReadPixels(0, 0, self.width, self.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, screenshot)
-        #image = Image.fromstring(mode="L", size=(self.width, self.height),
-        #                         data=screenshot)
-        #image.show()
-        #raw_input("Enter")
-
-        self.current_frame = screenshot
-        return screenshot
         
 
     def _update(self, dt):
@@ -474,6 +459,24 @@ class Window(pyglet.window.Window):
         self.player.position = (x, y, z)
 
 
+    def get_screen(self):
+        """Get a screen shot of the current game state"""
+        PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
+        # Initialize an array to store the screenshot pixels
+        screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)
+        # Grab a screenshot
+        # Use GL_RGB for color and GL_LUMINANCE for grayscale!
+        #glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot)
+        glReadPixels(0, 0, self.width, self.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, screenshot)
+        #image = Image.fromstring(mode="L", size=(self.width, self.height),
+        #                         data=screenshot)
+        #image.save("frame.png")
+        #image.show()
+        #raw_input("Enter")
+
+        return screenshot
+        
+        
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`
         is colliding with any blocks in the world.
