@@ -1,4 +1,5 @@
 build/
 screens/
+maps/test*.txt
 *.*~
 *.pyc
