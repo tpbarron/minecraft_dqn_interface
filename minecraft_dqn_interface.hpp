@@ -21,7 +21,7 @@ public:
   /* use virtual otherwise linker will try to perform static linkage */
   virtual void initInterface(int argc, char *argv[], std::string path);
   virtual void initMethods();
-  virtual void init();
+  virtual void init(bool evaluate);
   virtual std::vector<int> get_action_set();
   // NOTE: the size of the array must match the pixels in the screen shot
   virtual std::shared_ptr<std::array<uint8_t, 7056> > get_screen_as_array();

@@ -16,7 +16,9 @@ MinecraftInterface::~MinecraftInterface() {
 }
 
 
-void MinecraftInterface::initInterface(int argc, char *argv[], std::string modpath) {
+void MinecraftInterface::initInterface(int argc, 
+				       char *argv[], 
+				       std::string modpath) {
   std::cout << "Initializing" << std::endl;
   char * name = const_cast<char*>("game.py");
   Py_SetProgramName(name);
@@ -75,13 +77,16 @@ void MinecraftInterface::initMethods() {
 /*
  * Initialize the python game
  */
-void MinecraftInterface::init() {
-  std::cout << "initing" << std::endl;
-  PyObject *pValue = PyObject_CallObject(py_init, nullptr);
-  PyErr_Print();
+void MinecraftInterface::init(bool evaluate) {
+  PyObject *pEval = Py_BuildValue("(O)", evaluate ? Py_True : Py_False);
+  PyObject *pValue = PyObject_CallObject(py_init, pEval);
+
   if (PyString_Check(pValue)) {
     std::cout << PyString_AsString(pValue) << std::endl;
+  } else {
+    PyErr_Print();
   }
+
   Py_DECREF(pValue);
 }
 
@@ -250,11 +255,11 @@ void MinecraftInterface::reset() {
   PyObject_CallObject(py_reset, nullptr);
 }
 
-/*
+
 int main(int argc, char *argv[]) {
   MinecraftInterface iface(argc, argv, "");	
 //  MinecraftInterface iface;	
-  iface.init();
+  iface.init(false);
   iface.get_action_set();
   iface.act(0);
   
@@ -268,7 +273,7 @@ int main(int argc, char *argv[]) {
       iface.reset();
       gameItr++;
     } else {
-      iface.act(3);
+      iface.act(2);
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     frameItr++;
@@ -276,4 +281,3 @@ int main(int argc, char *argv[]) {
   
   return 0;
 }
-*/

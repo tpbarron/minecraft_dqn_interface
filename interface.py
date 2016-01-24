@@ -6,12 +6,19 @@ import time
 window = None
 itrCount = 0
 
-def init():
+def init(evaluate):
     """ 
     Initialize the game state
     """
     global window
-    window = Window(width=VIEW_WINDOW_SIZE, height=VIEW_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
+
+    if (evaluate):
+        window = Window(width=TEST_WINDOW_SIZE, height=TEST_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
+    else:
+        window = Window(width=TRAIN_WINDOW_SIZE, height=TRAIN_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
+
+    window.set_phase(evaluate)
+
     p = DeepMindPlayer()
     window.set_player(p)
     p.setGame(window)
@@ -89,7 +96,7 @@ def reset():
     
     
 if __name__ == "__main__":
-    init()
+    init(True)
     i = 0
     while i < 1000:
         img = get_screen()

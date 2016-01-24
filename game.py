@@ -362,7 +362,10 @@ class Window(pyglet.window.Window):
         # This is set to 1 whenever the max frames are reached
         # or the player dies
         self.game_over = False
-        
+
+        self.evaluate = False
+
+
     def reset(self):
         # Setup grayscale conversion color component scaling values
         glPixelTransferf(GL_RED_SCALE, 1)
@@ -386,6 +389,9 @@ class Window(pyglet.window.Window):
         glPixelTransferf(GL_GREEN_SCALE, 0.587)
         glPixelTransferf(GL_BLUE_SCALE, 0.114)
        
+
+    def set_phase(self, evaluate):
+        self.evaluate = evaluate
 
     def set_player(self, player):
         self.player = player
@@ -468,11 +474,19 @@ class Window(pyglet.window.Window):
         # Use GL_RGB for color and GL_LUMINANCE for grayscale!
         #glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot)
         glReadPixels(0, 0, self.width, self.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, screenshot)
-        #image = Image.fromstring(mode="L", size=(self.width, self.height),
-        #                         data=screenshot)
-        #image.save("frame.png")
-        #image.show()
-        #raw_input("Enter")
+
+        if (self.evaluate):
+            # need to scale screen
+            image = Image.fromstring(mode="L", size=(self.width, self.height),
+                                     data=screenshot)
+            image = image.resize((TRAIN_WINDOW_SIZE, TRAIN_WINDOW_SIZE))
+            
+            #image.save("frame.png")
+            screenshot = image.getdata()
+            #print (list(screenshot))
+            #print (len(list(screenshot)))
+            #image.show()
+            #raw_input("Enter")
 
         return screenshot
         

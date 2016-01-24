@@ -9,7 +9,8 @@ from game_globals import *
 
 # The width and height of the viewable game window (always square)
 # For maximum speed, set this to 84 to match the scaled size (no scaling is required!)
-VIEW_WINDOW_SIZE = 84
+TEST_WINDOW_SIZE = 600
+TRAIN_WINDOW_SIZE = 84
 
 # The width and height of the image sent to DeepMind
 #SCALED_WINDOW_SIZE = 84
