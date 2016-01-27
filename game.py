@@ -467,6 +467,7 @@ class Window(pyglet.window.Window):
 
     def get_screen(self):
         """Get a screen shot of the current game state"""
+
         PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
         # Initialize an array to store the screenshot pixels
         screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)

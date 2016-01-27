@@ -11,6 +11,7 @@ def init(evaluate):
     Initialize the game state
     """
     global window
+    print ("Initialing in evaluate mode: ", evaluate)
 
     if (evaluate):
         window = Window(width=TEST_WINDOW_SIZE, height=TEST_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
@@ -54,7 +55,6 @@ def act(action):
     """
     #print ("python act 1")
     global window
-    #print "Performing action ", action
     # first apply the action
     window.player.performAction(action)
     #print ("python act 2")

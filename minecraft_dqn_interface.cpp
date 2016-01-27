@@ -255,7 +255,7 @@ void MinecraftInterface::reset() {
   PyObject_CallObject(py_reset, nullptr);
 }
 
-
+/*
 int main(int argc, char *argv[]) {
   MinecraftInterface iface(argc, argv, "");	
 //  MinecraftInterface iface;	
@@ -281,3 +281,4 @@ int main(int argc, char *argv[]) {
   
   return 0;
 }
+*/
