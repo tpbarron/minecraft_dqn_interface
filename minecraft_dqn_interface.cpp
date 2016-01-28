@@ -5,6 +5,8 @@
 #include <chrono>
 #include <thread>
 
+namespace minecraft_interface {
+
 MinecraftInterface::MinecraftInterface(int argc, 
 				       char *argv[], 
 				       const std::string path) {
@@ -126,7 +128,7 @@ std::shared_ptr<std::array<uint8_t, 7056> > MinecraftInterface::get_screen_as_ar
 
   // assuming we have a list 
   if (PyList_Check(pValue)) {
-    int width = 84, height = 84;
+    int width = kCroppedFrameSize, height = kCroppedFrameSize;
 
     for (int i = 0; i < width * height; ++i) {
       PyObject *v = PyList_GetItem(pValue, i); // get the item at index i
@@ -161,7 +163,7 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
   
   // assuming we have a list
   if (PyList_Check(pValue)) {
-    int width = 84, height = 84;
+    int width = kCroppedFrameSize, height = kCroppedFrameSize;
     int channels = 1;
     int i = 0;
     tmp.create(width, height, CV_8UC1);
@@ -207,7 +209,6 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
   return tmp;
 }
 
-
 /*
  * Perform the action designated by the id
  */
@@ -248,6 +249,8 @@ bool MinecraftInterface::is_game_over() {
  */
 void MinecraftInterface::reset() {
   PyObject_CallObject(py_reset, nullptr);
+}
+
 }
 
 /*

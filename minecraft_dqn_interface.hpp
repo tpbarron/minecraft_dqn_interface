@@ -11,6 +11,10 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+namespace minecraft_interface {
+
+constexpr auto kCroppedFrameSize = 256;
+
 class MinecraftInterface {
 
 public:
@@ -39,5 +43,7 @@ private:
   PyObject *py_init, *py_get_action_set, *py_get_screen, *py_act, *py_is_game_over, *py_reset;
 
 };
+
+}
 
 #endif
