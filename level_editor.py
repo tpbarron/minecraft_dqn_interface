@@ -1,4 +1,5 @@
 import os
+import sys
 import math
 import random
 import time
@@ -9,13 +10,117 @@ from pyglet.gl import *
 from pyglet.graphics import TextureGroup
 from pyglet.window import key, mouse
 
-from PIL import Image
+TICKS_PER_SEC = 60
 
-from game_globals import *
-from game_config import *
+# Size of sectors used to ease block loading.
+SECTOR_SIZE = 16
 
-from Player import Player
-from DeepMindPlayer import DeepMindPlayer
+WALKING_SPEED = 5
+FLYING_SPEED = 15
+
+GRAVITY = 20.0
+MAX_JUMP_HEIGHT = 1.0 # About the height of a block.
+# To derive the formula for calculating jump speed, first solve
+#    v_t = v_0 + a * t
+# for the time at which you achieve maximum height, where a is the acceleration
+# due to gravity and v_t = 0. This gives:
+#    t = - v_0 / a
+# Use t and the desired MAX_JUMP_HEIGHT to solve for v_0 (jump speed) in
+#    s = s_0 + v_0 * t + (a * t^2) / 2
+JUMP_SPEED = math.sqrt(2 * GRAVITY * MAX_JUMP_HEIGHT)
+TERMINAL_VELOCITY = 50
+
+PLAYER_HEIGHT = 2
+
+def cube_vertices(x, y, z, n):
+    """ Return the vertices of the cube at position x, y, z with size 2*n.
+
+    """
+    return [
+        x-n,y+n,z-n, x-n,y+n,z+n, x+n,y+n,z+n, x+n,y+n,z-n,  # top
+        x-n,y-n,z-n, x+n,y-n,z-n, x+n,y-n,z+n, x-n,y-n,z+n,  # bottom
+        x-n,y-n,z-n, x-n,y-n,z+n, x-n,y+n,z+n, x-n,y+n,z-n,  # left
+        x+n,y-n,z+n, x+n,y-n,z-n, x+n,y+n,z-n, x+n,y+n,z+n,  # right
+        x-n,y-n,z+n, x+n,y-n,z+n, x+n,y+n,z+n, x-n,y+n,z+n,  # front
+        x+n,y-n,z-n, x-n,y-n,z-n, x-n,y+n,z-n, x+n,y+n,z-n,  # back
+    ]
+
+
+def tex_coord(x, y, n=4):
+    """ Return the bounding vertices of the texture square.
+
+    """
+    m = 1.0 / n
+    dx = x * m
+    dy = y * m
+    return dx, dy, dx + m, dy, dx + m, dy + m, dx, dy + m
+
+
+def tex_coords(top, bottom, side):
+    """ Return a list of the texture squares for the top, bottom and side.
+
+    """
+    top = tex_coord(*top)
+    bottom = tex_coord(*bottom)
+    side = tex_coord(*side)
+    result = []
+    result.extend(top)
+    result.extend(bottom)
+    result.extend(side * 4)
+    return result
+
+
+TEXTURE_PATH = 'texture.png'
+
+GRASS = tex_coords((1, 0), (0, 1), (0, 0))
+SAND = tex_coords((1, 1), (1, 1), (1, 1))
+BRICK = tex_coords((2, 0), (2, 0), (2, 0))
+STONE = tex_coords((2, 1), (2, 1), (2, 1))
+
+FACES = [
+    ( 0, 1, 0),
+    ( 0,-1, 0),
+    (-1, 0, 0),
+    ( 1, 0, 0),
+    ( 0, 0, 1),
+    ( 0, 0,-1),
+]
+
+
+def normalize(position):
+    """ Accepts `position` of arbitrary precision and returns the block
+    containing that position.
+
+    Parameters
+    ----------
+    position : tuple of len 3
+
+    Returns
+    -------
+    block_position : tuple of ints of len 3
+
+    """
+    x, y, z = position
+    x, y, z = (int(round(x)), int(round(y)), int(round(z)))
+    return (x, y, z)
+
+
+def sectorize(position):
+    """ Returns a tuple representing the sector for the given `position`.
+
+    Parameters
+    ----------
+    position : tuple of len 3
+
+    Returns
+    -------
+    sector : tuple of len 3
+
+    """
+    x, y, z = normalize(position)
+    x, y, z = x / SECTOR_SIZE, y / SECTOR_SIZE, z / SECTOR_SIZE
+    return (x, 0, z)
+
 
 class Model(object):
 
@@ -44,27 +149,13 @@ class Model(object):
         # _show_block() and _hide_block() calls
         self.queue = deque()
 
-        #self._initialize()
+        self._initialize()
 
+    def _initialize(self):
+        """ Initialize the world by placing all the blocks.
 
-
-    def loadMap(self, level):
-        #f = open("world.txt", 'r')
-        f = open(MAPS_PATH + '/' + level, 'r')
-        for line in f:
-            x, y, z, kind = line.split()
-            x, y, z = float(x), float(y), float(z)
-            if kind == "GRASS":
-                self.add_block((x, y, z), GRASS, immediate=False)
-            elif kind == "STONE":
-                self.add_block((x, y, z), STONE, immediate=False)
-            elif kind == "BRICK":
-                self.add_block((x, y, z), BRICK, immediate=False)
-            #self.add_block((x, y - 3, z), STONE, immediate=False)
-                
-        f.close()
-       
-
+        """
+        
 
     def hit_test(self, position, vector, max_distance=8):
         """ Line of sight search from current position. If a block is
@@ -104,7 +195,7 @@ class Model(object):
                 return True
         return False
 
-    def add_block(self, position, texture=GRASS, immediate=True):
+    def add_block(self, position, texture, immediate=True):
         """ Add a block with the given `texture` and `position` to the world.
 
         Parameters
@@ -144,11 +235,6 @@ class Model(object):
             if position in self.shown:
                 self.hide_block(position)
             self.check_neighbors(position)
-
-    def try_remove_block(self, position, immediate=True):
-        if position in self.world:
-            self.remove_block(position, immediate)
-        
 
     def check_neighbors(self, position):
         """ Check all blocks surrounding `position` and ensure their visual
@@ -309,8 +395,23 @@ class Model(object):
         while self.queue:
             self._dequeue()
 
-
+    def loadMap(self, filename):
+        print "Loading world!", filename
+        f = open(filename, 'r')
+        for line in f:
+            x, y, z, kind = line.split()
+            x, y, z = float(x), float(y), float(z)
+            if kind == "GRASS":
+                self.add_block((x, y, z), GRASS, immediate=False)
+            elif kind == "STONE":
+                self.add_block((x, y, z), STONE, immediate=False)
+            elif kind == "BRICK":
+                self.add_block((x, y, z), BRICK, immediate=False)
+                
+        f.close()
+        
     def saveWorld(self, filename="maps" + os.sep + "world.txt"):
+        print "SAVING WORLD!", filename
         o = open(filename, 'w')
         for position in self.world.keys():
             if self.world[position] == GRASS:
@@ -318,7 +419,6 @@ class Model(object):
             elif self.world[position] == STONE:
                 o.write(("%d %d %d" % position) + " %s\n" % "STONE")
         o.close()
-
 
 class Window(pyglet.window.Window):
 
@@ -328,11 +428,43 @@ class Window(pyglet.window.Window):
         # Whether or not the window exclusively captures the mouse.
         self.exclusive = False
 
+        # When flying gravity has no effect and speed is increased.
+        self.flying = False
+
+        # Strafing is moving lateral to the direction you are facing,
+        # e.g. moving to the left or right while continuing to face forward.
+        #
+        # First element is -1 when moving forward, 1 when moving back, and 0
+        # otherwise. The second element is -1 when moving left, 1 when moving
+        # right, and 0 otherwise.
+        self.strafe = [0, 0]
+
+        # Current (x, y, z) position in the world, specified with floats. Note
+        # that, perhaps unlike in math class, the y-axis is the vertical axis.
+        self.position = (0, 0, 0)
+
+        # First element is rotation of the player in the x-z plane (ground
+        # plane) measured from the z-axis down. The second is the rotation
+        # angle from the ground plane up. Rotation is in degrees.
+        #
+        # The vertical plane rotation ranges from -90 (looking straight down) to
+        # 90 (looking straight up). The horizontal rotation range is unbounded.
+        self.rotation = (0, 0)
+
         # Which sector the player is currently in.
         self.sector = None
 
         # The crosshairs at the center of the screen.
         self.reticle = None
+
+        # Velocity in the y (upward) direction.
+        self.dy = 0
+
+        # A list of blocks the player can place. Hit num keys to cycle.
+        self.inventory = [GRASS]
+
+        # The current block the user can place. Hit num keys to cycle.
+        self.block = self.inventory[0]
 
         # Convenience list of num keys.
         self.num_keys = [
@@ -341,71 +473,83 @@ class Window(pyglet.window.Window):
 
         # Instance of the model that handles the world.
         self.model = Model()
+        
 
-        # Number of ticks gone by in the world
-        self.world_counter = 0
+        self.model.loadMap(sys.argv[1])
+
 
         # The label that is displayed in the top left of the canvas.
-        # self.label = pyglet.text.Label('', font_name='Arial', font_size=22, bold=True,
-        #     x=20, y=self.height - 10, anchor_x='left', anchor_y='top', 
-        #     color=(0,0,0,255))
+        self.label = pyglet.text.Label('', font_name='Arial', font_size=18,
+            x=10, y=self.height - 10, anchor_x='left', anchor_y='top',
+            color=(0, 0, 0, 255))
 
         # This call schedules the `update()` method to be called
         # TICKS_PER_SEC. This is the main game event loop.
-        #pyglet.clock.set_fps_limit(1000)
-        #pyglet.clock.schedule_interval(self.update, 1.0 / TICKS_PER_SEC)
-        #pyglet.clock.schedule(self.update)
-
-        #self.current_frame = [[.76, .67],[.88, .91]]
-        
-        # Int flag to indicate the end of the game
-        # This is set to 1 whenever the max frames are reached
-        # or the player dies
-        self.game_over = False
-
-        self.evaluate = False
-
-
-    def reset(self):
-        # Setup grayscale conversion color component scaling values
-        glPixelTransferf(GL_RED_SCALE, 1)
-        glPixelTransferf(GL_GREEN_SCALE, 1)
-        glPixelTransferf(GL_BLUE_SCALE, 1)
-    
-        self.model = Model()
-        self.world_counter = 0
-        self.exclusive = False
-        self.sector = None
-        self.reticle = None
-        self.game_over = False
-        self.player = DeepMindPlayer()
-        self.player.setGame(self)
-        world_file = "test%d.txt" % random.randrange(10)
-        generateGameWorld(world_file)
-        self.model.loadMap(world_file)
-        #self.set_game_frame_limit(10000) ??
-        
-        glPixelTransferf(GL_RED_SCALE, 0.299)
-        glPixelTransferf(GL_GREEN_SCALE, 0.587)
-        glPixelTransferf(GL_BLUE_SCALE, 0.114)
-       
-
-    def set_phase(self, evaluate):
-        self.evaluate = evaluate
-
-    def set_player(self, player):
-        self.player = player
-        
-    def set_game_frame_limit(self, max_frames):
-        self.max_frames = max_frames
+        pyglet.clock.schedule_interval(self.update, 1.0 / TICKS_PER_SEC)
 
     def set_exclusive_mouse(self, exclusive):
         """ If `exclusive` is True, the game will capture the mouse, if False
         the game will ignore the mouse.
+
         """
         super(Window, self).set_exclusive_mouse(exclusive)
         self.exclusive = exclusive
 
+    def get_sight_vector(self):
+        """ Returns the current line of sight vector indicating the direction
+        the player is looking.
+
+        """
+        x, y = self.rotation
+        # y ranges from -90 to 90, or -pi/2 to pi/2, so m ranges from 0 to 1 and
+        # is 1 when looking ahead parallel to the ground and 0 when looking
+        # straight up or down.
+        m = math.cos(math.radians(y))
+        # dy ranges from -1 to 1 and is -1 when looking straight down and 1 when
+        # looking straight up.
+        dy = math.sin(math.radians(y))
+        dx = math.cos(math.radians(x - 90)) * m
+        dz = math.sin(math.radians(x - 90)) * m
+        return (dx, dy, dz)
+
+    def get_motion_vector(self):
+        """ Returns the current motion vector indicating the velocity of the
+        player.
+
+        Returns
+        -------
+        vector : tuple of len 3
+            Tuple containing the velocity in x, y, and z respectively.
+
+        """
+        if any(self.strafe):
+            x, y = self.rotation
+            strafe = math.degrees(math.atan2(*self.strafe))
+            y_angle = math.radians(y)
+            x_angle = math.radians(x + strafe)
+            if self.flying:
+                m = math.cos(y_angle)
+                dy = math.sin(y_angle)
+                if self.strafe[1]:
+                    # Moving left or right.
+                    dy = 0.0
+                    m = 1
+                if self.strafe[0] > 0:
+                    # Moving backwards.
+                    dy *= -1
+                # When you are flying up or down, you have less left and right
+                # motion.
+                dx = math.cos(x_angle) * m
+                dz = math.sin(x_angle) * m
+            else:
+                dy = 0.0
+                dx = math.cos(x_angle)
+                dz = math.sin(x_angle)
+        else:
+            dy = 0.0
+            dx = 0.0
+            dz = 0.0
+        return (dx, dy, dz)
 
     def update(self, dt):
         """ This method is scheduled to be called repeatedly by the pyglet
@@ -417,13 +561,8 @@ class Window(pyglet.window.Window):
             The change in time since the last call.
 
         """
-     
-        self.world_counter += 1
-        if self.world_counter >= MAXIMUM_GAME_FRAMES:
-            self.game_over = True
-     
         self.model.process_queue()
-        sector = sectorize(self.player.position)
+        sector = sectorize(self.position)
         if sector != self.sector:
             self.model.change_sectors(self.sector, sector)
             if self.sector is None:
@@ -433,7 +572,6 @@ class Window(pyglet.window.Window):
         dt = min(dt, 0.2)
         for _ in xrange(m):
             self._update(dt / m)
-        
 
     def _update(self, dt):
         """ Private implementation of the `update()` method. This is where most
@@ -446,62 +584,24 @@ class Window(pyglet.window.Window):
 
         """
         # walking
-        speed = FLYING_SPEED if self.player.flying else WALKING_SPEED
+        speed = FLYING_SPEED if self.flying else WALKING_SPEED
         d = dt * speed # distance covered this tick.
-        dx, dy, dz = self.player.get_motion_vector()
+        dx, dy, dz = self.get_motion_vector()
         # New position in space, before accounting for gravity.
         dx, dy, dz = dx * d, dy * d, dz * d
         # gravity
-        if not self.player.flying:
+        if not self.flying:
             # Update your vertical speed: if you are falling, speed up until you
             # hit terminal velocity; if you are jumping, slow down until you
             # start falling.
-            self.player.dy -= dt * GRAVITY
-            self.player.dy = max(self.player.dy, -TERMINAL_VELOCITY)
-            dy += self.player.dy * dt
+            self.dy -= dt * GRAVITY
+            self.dy = max(self.dy, -TERMINAL_VELOCITY)
+            dy += self.dy * dt
         # collisions
-        x, y, z = self.player.position
+        x, y, z = self.position
         x, y, z = self.collide((x + dx, y + dy, z + dz), PLAYER_HEIGHT)
-        self.player.position = (x, y, z)
+        self.position = (x, y, z)
 
-
-    def get_screen(self):
-        """Get a screen shot of the current game state"""
-
-        PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
-        # Initialize an array to store the screenshot pixels
-        screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)
-        # Grab a screenshot
-        # Use GL_RGB for color and GL_LUMINANCE for grayscale!
-        #glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot)
-        glReadPixels(0, 0, self.width, self.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, screenshot)
-
-        if (self.evaluate):
-            # need to scale screen
-            image = Image.fromstring(mode="L", size=(self.width, self.height),
-                                     data=screenshot)
-            image = image.resize((TRAIN_WINDOW_SIZE, TRAIN_WINDOW_SIZE))
-            
-            #image.save("frame.png")
-            screenshot = image.getdata()
-            #print (list(screenshot))
-            #print (len(list(screenshot)))
-            #image.show()
-            #raw_input("Enter")
-
-        return screenshot
-        
-    
-    def get_volume(self):
-        blocks = self.model.shown
-        print len(blocks)
-        for k, v in blocks.iteritems():
-            print k, v
-        raw_input("Enter ")
-
-        return "test"
-        
-        
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`
         is colliding with any blocks in the world.
@@ -544,15 +644,60 @@ class Window(pyglet.window.Window):
                     if face == (0, -1, 0) or face == (0, 1, 0):
                         # You are colliding with the ground or ceiling, so stop
                         # falling / rising.
-                        self.player.dy = 0
+                        self.dy = 0
                     break
         return tuple(p)
 
+    def on_mouse_press(self, x, y, button, modifiers):
+        """ Called when a mouse button is pressed. See pyglet docs for button
+        amd modifier mappings.
 
-        
+        Parameters
+        ----------
+        x, y : int
+            The coordinates of the mouse click. Always center of the screen if
+            the mouse is captured.
+        button : int
+            Number representing mouse button that was clicked. 1 = left button,
+            4 = right button.
+        modifiers : int
+            Number representing any modifying keys that were pressed when the
+            mouse button was clicked.
 
+        """
+        if self.exclusive:
+            vector = self.get_sight_vector()
+            block, previous = self.model.hit_test(self.position, vector)
+            if (button == mouse.RIGHT) or \
+                    ((button == mouse.LEFT) and (modifiers & key.MOD_CTRL)):
+                # ON OSX, control + left click = right click.
+                if previous:
+                    self.model.add_block(previous, self.block)
+            elif button == pyglet.window.mouse.LEFT and block:
+                texture = self.model.world[block]
+                if texture != STONE:
+                    self.model.remove_block(block)
+        else:
+            self.set_exclusive_mouse(True)
 
+    def on_mouse_motion(self, x, y, dx, dy):
+        """ Called when the player moves the mouse.
 
+        Parameters
+        ----------
+        x, y : int
+            The coordinates of the mouse click. Always center of the screen if
+            the mouse is captured.
+        dx, dy : float
+            The movement of the mouse.
+
+        """
+        if self.exclusive:
+            m = 0.15
+            x, y = self.rotation
+            x, y = x + dx * m, y + dy * m
+            y = max(-90, min(90, y))
+            self.rotation = (x, y)
 
     def on_key_press(self, symbol, modifiers):
         """ Called when the player presses a key. See pyglet docs for key
@@ -566,14 +711,27 @@ class Window(pyglet.window.Window):
             Number representing any modifying keys that were pressed.
 
         """
-
-        if symbol == key.P:
-            print "SAVING WORLD!"
-            self.model.saveWorld()
+        if symbol == key.W:
+            self.strafe[0] -= 1
+        elif symbol == key.S:
+            self.strafe[0] += 1
+        elif symbol == key.A:
+            self.strafe[1] -= 1
+        elif symbol == key.D:
+            self.strafe[1] += 1
+        elif symbol == key.P:
+            self.model.saveWorld("maps/world.txt")
+        elif symbol == key.SPACE:
+            if self.dy == 0:
+                self.dy = JUMP_SPEED
+                print "JUMPING"
         elif symbol == key.ESCAPE:
             self.set_exclusive_mouse(False)
-            pyglet.app.exit()
-
+        elif symbol == key.TAB:
+            self.flying = not self.flying
+        elif symbol in self.num_keys:
+            index = (symbol - self.num_keys[0]) % len(self.inventory)
+            self.block = self.inventory[index]
 
     def on_key_release(self, symbol, modifiers):
         """ Called when the player releases a key. See pyglet docs for key
@@ -587,25 +745,29 @@ class Window(pyglet.window.Window):
             Number representing any modifying keys that were pressed.
 
         """
-        pass
-
+        if symbol == key.W:
+            self.strafe[0] += 1
+        elif symbol == key.S:
+            self.strafe[0] -= 1
+        elif symbol == key.A:
+            self.strafe[1] += 1
+        elif symbol == key.D:
+            self.strafe[1] -= 1
 
     def on_resize(self, width, height):
         """ Called when the window is resized to a new `width` and `height`.
 
         """
         # label
-        #self.label.y = height - 10
-        
+        self.label.y = height - 10
         # reticle
-        # if self.reticle:
-        #     self.reticle.delete()
-        # x, y = self.width / 2, self.height / 2
-        # n = 10
-        # self.reticle = pyglet.graphics.vertex_list(4,
-        #     ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
-        # )
-
+        if self.reticle:
+            self.reticle.delete()
+        x, y = self.width / 2, self.height / 2
+        n = 10
+        self.reticle = pyglet.graphics.vertex_list(4,
+            ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
+        )
 
     def set_2d(self):
         """ Configure OpenGL to draw in 2d.
@@ -632,32 +794,32 @@ class Window(pyglet.window.Window):
         gluPerspective(65.0, width / float(height), 0.1, 60.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
-        x, y = self.player.rotation
+        x, y = self.rotation
         glRotatef(x, 0, 1, 0)
         glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
-        x, y, z = self.player.position
+        x, y, z = self.position
         glTranslatef(-x, -y, -z)
 
-    
     def on_draw(self):
-        """ Called by pyglet to draw the canvas."""
+        """ Called by pyglet to draw the canvas.
+
+        """
         self.clear()
         self.set_3d()
         glColor3d(1, 1, 1)
         self.model.batch.draw()
         self.draw_focused_block()
         self.set_2d()
-        self.draw_labels()
-        #self.draw_reticle()
-        
-        
+        self.draw_label()
+        self.draw_reticle()
+
     def draw_focused_block(self):
         """ Draw black edges around the block that is currently under the
         crosshairs.
 
         """
-        vector = self.player.get_sight_vector()
-        block = self.model.hit_test(self.player.position, vector)[0]
+        vector = self.get_sight_vector()
+        block = self.model.hit_test(self.position, vector)[0]
         if block:
             x, y, z = block
             vertex_data = cube_vertices(x, y, z, 0.51)
@@ -666,16 +828,16 @@ class Window(pyglet.window.Window):
             pyglet.graphics.draw(24, GL_QUADS, ('v3f/static', vertex_data))
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
-    def draw_labels(self):
+    def draw_label(self):
         """ Draw the label in the top left of the screen.
 
         """
-        #x, y, z = self.position
-        #self.label.text = '%02d (%.2f, %.2f, %.2f) %d / %d -- Current spell: %s' % (
-        #    pyglet.clock.get_fps(), x, y, z,
-        #    len(self.model._shown), len(self.model.world), str(self.current_spell))
-        #self.label.text = 'Spell: %s' % (str(self.player.current_spell))
-        #self.label.draw()
+        x, y, z = self.position
+        rxz, ry = self.rotation
+        self.label.text = '%02d (%.2f, %.2f, %.2f) (%.2f, %.2f) %d / %d' % (
+            pyglet.clock.get_fps(), x, y, z, rxz, ry,
+            len(self.model._shown), len(self.model.world))
+        self.label.draw()
 
     def draw_reticle(self):
         """ Draw the crosshairs in the center of the screen.
@@ -683,8 +845,6 @@ class Window(pyglet.window.Window):
         """
         glColor3d(0, 0, 0)
         self.reticle.draw(GL_LINES)
-        
-
 
 
 def setup_fog():
@@ -706,13 +866,12 @@ def setup_fog():
     glFogf(GL_FOG_END, 60.0)
 
 
-def opengl_setup():
+def setup():
     """ Basic OpenGL configuration.
 
     """
     # Set the color of "clear", i.e. the sky, in rgba.
-    #glClearColor(0.5, 0.69, 1.0, 1)
-    glClearColor(1, 1, 1.0, 1)
+    glClearColor(0.5, 0.69, 1.0, 1)
     # Enable culling (not rendering) of back-facing facets -- facets that aren't
     # visible to you.
     glEnable(GL_CULL_FACE)
@@ -724,40 +883,18 @@ def opengl_setup():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     setup_fog()
-    
-    # Setup grayscale conversion color component scaling values
-    glPixelTransferf(GL_RED_SCALE, 0.299)
-    glPixelTransferf(GL_GREEN_SCALE, 0.587)
-    glPixelTransferf(GL_BLUE_SCALE, 0.114)
 
-"""
 
 def main():
-    window = Window(width=VIEW_WINDOW_SIZE, height=VIEW_WINDOW_SIZE, caption='MindCraft', resizable=True, vsync=False)
-    
-    #p = Player()
-    p = DeepMindPlayer()
-    
-    window.set_player(p)
-    p.setGame(window)
-    world_file = "test%d.txt" % random.randrange(10)
-    generateGameWorld(world_file)
-    window.model.loadMap("maps/%s" % world_file)
-
-    opengl_setup()
-    
-    #pyglet.app.run()
-    return window
+    window = Window(width=800, height=600, caption='Pyglet', resizable=True)
+    # Hide the mouse cursor and prevent the mouse from leaving the window.
+    window.set_exclusive_mouse(True)
+    setup()
+    pyglet.app.run()
 
 
-def step(window):
-    pyglet.clock.tick()
-    window.update(100)  # fake ms of time pass
-    window.switch_to()
-    window.dispatch_events()
-    window.dispatch_event('on_draw')
-    window.flip()
-    #time.sleep(2)
-
-    
-"""
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("python level_editor.py world.txt")
+        sys.exit(1)
+    main()
