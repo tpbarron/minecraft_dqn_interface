@@ -47,6 +47,14 @@ def get_screen():
     #print len(list(screen))
     #print list(screen)
     return list(screen)
+    
+
+def get_volume():
+    """
+    Get a representation of the 3D environment
+    """
+    volume = window.get_volume()
+    print (volume)
 
 
 def act(action):
@@ -100,6 +108,7 @@ if __name__ == "__main__":
     i = 0
     while i < 1000:
         img = get_screen()
+        get_volume()
         #cv2.imwrite("image.png", img)
         over = is_game_over()
         if (over):

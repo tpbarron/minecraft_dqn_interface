@@ -491,6 +491,16 @@ class Window(pyglet.window.Window):
 
         return screenshot
         
+    
+    def get_volume(self):
+        blocks = self.model._shown
+        print len(blocks)
+        for k, v in blocks.iteritems():
+            print k, v
+        raw_input("Enter ")
+
+        return "test"
+        
         
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`
