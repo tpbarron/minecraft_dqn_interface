@@ -17,6 +17,9 @@ from game_config import *
 from Player import Player
 from DeepMindPlayer import DeepMindPlayer
 
+# field of view
+FOV = 65.0
+
 class Model(object):
 
     def __init__(self):
@@ -495,11 +498,49 @@ class Window(pyglet.window.Window):
     def get_volume(self):
         blocks = self.model.shown
         print len(blocks)
-        for k, v in blocks.iteritems():
-            print k, v
+        
+        agentRot = self.player.rotation
+        agentPos = self.player.position
+        agentPos = agentPos[:1] + (agentPos[1]+PLAYER_HEIGHT,) + agentPos[2:]
+
+        print ("XZ")
+        for blockPos in blocks.keys():
+            #print k
+            self.isBlockInXZ_FOV(agentRot, agentPos, blockPos)
+
+        print ("YZ")
+        for blockPos in blocks.keys():
+            #print k
+            self.isBlockInYZ_FOV(agentRot, agentPos, blockPos)
+
         raw_input("Enter ")
 
         return "test"
+        
+    
+    def isBlockInXZ_FOV(self, agentRot, agentPos, blockPos):
+        bx, by, bz = blockPos
+        ax, ay, az = agentPos
+        xzRot, yzRot = agentRot
+                
+        opp = ax - bx
+        adj = az - bz
+        theta = math.atan2(opp, adj)
+        degs = math.degrees(theta)
+        print (agentPos, blockPos, degs)
+        
+    def isBlockInYZ_FOV(self, agentRot, agentPos, blockPos):
+        bx, by, bz = blockPos
+        ax, ay, az = agentPos
+        xzRot, yzRot = agentRot
+        
+        opp = math.fabs(ay - by)
+        adj = math.fabs(az - bz)
+        theta = math.atan2(opp, adj)
+        degs = math.degrees(theta)
+        inFOV = ( degs <= (FOV / 2.0) + yzRot ) and ( degs >= yzRot - (FOV / 2.0) )
+        print (agentPos, blockPos, degs, inFOV)        
+        return inFOV
         
         
     def collide(self, position, height):
@@ -629,7 +670,7 @@ class Window(pyglet.window.Window):
         glViewport(0, 0, width, height)
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        gluPerspective(65.0, width / float(height), 0.1, 60.0)
+        gluPerspective(FOV, width / float(height), 0.1, 60.0)
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
         x, y = self.player.rotation
