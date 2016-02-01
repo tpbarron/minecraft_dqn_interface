@@ -54,7 +54,13 @@ def get_volume():
     Get a representation of the 3D environment
     """
     volume = window.get_volume()
-    print (volume)
+    for i in range(volume.shape[0]):
+        for j in range(volume.shape[1]):
+            for k in range(volume.shape[2]):
+                if (volume[i][j][k] != 0):
+                    print (i, j, k) #volume[i][j][k])
+    
+    return list(volume)
 
 
 def act(action):
@@ -116,7 +122,7 @@ if __name__ == "__main__":
             reset()
         else:
             #pass
-            r = act(2)
+            r = act(3)
             print ("reward = ", r)
         i += 1
         time.sleep(.05)

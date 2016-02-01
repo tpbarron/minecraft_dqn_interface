@@ -10,6 +10,7 @@ from pyglet.graphics import TextureGroup
 from pyglet.window import key, mouse
 
 from PIL import Image
+import numpy as np
 
 from game_globals import *
 from game_config import *
@@ -494,53 +495,105 @@ class Window(pyglet.window.Window):
 
         return screenshot
         
-    
+
     def get_volume(self):
+        # Alternative possibility
+        # Rotate pos to block vector by -player rot
+        # Sight vector will just be neg z
+
         blocks = self.model.shown
-        print len(blocks)
         
         agentRot = self.player.rotation
         agentPos = self.player.position
-        agentPos = agentPos[:1] + (agentPos[1]+PLAYER_HEIGHT,) + agentPos[2:]
 
-        print ("XZ")
-        for blockPos in blocks.keys():
-            #print k
-            self.isBlockInXZ_FOV(agentRot, agentPos, blockPos)
-
-        print ("YZ")
-        for blockPos in blocks.keys():
-            #print k
-            self.isBlockInYZ_FOV(agentRot, agentPos, blockPos)
-
-        raw_input("Enter ")
-
-        return "test"
+        yAxisRot = agentRot[0]
+        xAxisRot = agentRot[1]
         
-    
-    def isBlockInXZ_FOV(self, agentRot, agentPos, blockPos):
+        volume = np.zeros((10, 10, 10))
+        
+        for blockPos in blocks.keys():
+            # get vector from position to block
+            # +1 on the y for eye height
+            block_vec = (blockPos[0] - agentPos[0], blockPos[1] - agentPos[1] + 1, blockPos[2] - agentPos[2])
+
+            # Translate block vec to original coordinates
+            # unrotate about y axis
+            new_block_vec = self.rotateY(block_vec, math.radians(yAxisRot))
+            
+            # unrotate about x axis
+            new_block_vec = self.rotateX(new_block_vec, math.radians(xAxisRot))
+            
+            # untranslate x, y, z
+            new_block_vec = self.translate(new_block_vec, (-agentPos[0], -agentPos[1], -agentPos[2]))
+            #print ("Block vec", new_block_vec)
+        
+            # check if block is in xz FOV
+            # check if block is in yz FOV
+            if (self.isBlockInXZ_FOV(new_block_vec) and self.isBlockInYZ_FOV(new_block_vec)):
+                print ("In FOV")
+                # add to some 3d matrix
+                print (round(-new_block_vec[0]), round(-new_block_vec[1]), round(-new_block_vec[2]) )
+                volume[round(-new_block_vec[0])+5-1][round(-new_block_vec[1])-1][round(-new_block_vec[2])-1] = 1.0      
+
+            #raw_input("Enter")
+
+        return volume
+        
+
+        
+    def rotateX(self, vec, theta):
+        mat = np.array([[1, 0, 0], 
+                        [0, np.cos(theta), -np.sin(theta)],
+                        [0, np.sin(theta), np.cos(theta)]])
+        return np.dot(mat, vec)
+        
+    def rotateY(self, vec, theta):
+        mat = np.array([[np.cos(theta), 0, np.sin(theta)], 
+                        [0, 1, 0],
+                        [-np.sign(theta), 0, np.cos(theta)]])
+        return np.dot(mat, vec)
+        
+    def rotateZ(self, vec, theta):
+        mat = np.array([[np.cos(theta), -np.sin(theta), 0], 
+                        [np.sin(theta), np.cos(theta), 0],
+                        [0, 0, 1]])
+        return np.dot(mat, vec)
+        
+    def translate(self, vec, dvec):
+        mat = np.array([[1, 0, 0, dvec[0]],
+                        [0, 1, 0, dvec[1]],
+                        [0, 0, 1, dvec[2]],
+                        [0, 0, 0, 1]])
+        vecAnd1 = np.array([vec[0], vec[1], vec[2], 1])
+        return np.dot(mat, vecAnd1)[:3]
+                    
+      
+    def isBlockInXZ_FOV(self, blockPos):
+        """
+        Agent position is assumed to be 0,0,0 looking in -Z direction
+        """
         bx, by, bz = blockPos
-        ax, ay, az = agentPos
-        xzRot, yzRot = agentRot
-                
-        opp = ax - bx
-        adj = az - bz
+
+        opp = -bx
+        adj = -bz
         theta = math.atan2(opp, adj)
         degs = math.degrees(theta)
-        print (agentPos, blockPos, degs)
+        #print (blockPos, degs)
+        return degs <= (FOV / 2.0)
+
         
-    def isBlockInYZ_FOV(self, agentRot, agentPos, blockPos):
+    def isBlockInYZ_FOV(self, blockPos):
+        """
+        Agent position is assumed to be 0,0,0 looking in -Z direction
+        """
         bx, by, bz = blockPos
-        ax, ay, az = agentPos
-        xzRot, yzRot = agentRot
         
-        opp = math.fabs(ay - by)
-        adj = math.fabs(az - bz)
+        opp = -by # minus so that in first quadrant, since looking towards negative z
+        adj = -bz
         theta = math.atan2(opp, adj)
         degs = math.degrees(theta)
-        inFOV = ( degs <= (FOV / 2.0) + yzRot ) and ( degs >= yzRot - (FOV / 2.0) )
-        print (agentPos, blockPos, degs, inFOV)        
-        return inFOV
+        #print (blockPos, degs)
+        return degs <= (FOV / 2.0)
         
         
     def collide(self, position, height):
