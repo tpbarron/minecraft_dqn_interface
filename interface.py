@@ -122,7 +122,7 @@ if __name__ == "__main__":
             reset()
         else:
             #pass
-            r = act(3)
+            r = act(0)
             print ("reward = ", r)
         i += 1
         time.sleep(.05)

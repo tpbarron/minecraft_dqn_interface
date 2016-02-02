@@ -11,6 +11,8 @@ from pyglet.window import key, mouse
 
 from PIL import Image
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 from game_globals import *
 from game_config import *
@@ -511,34 +513,71 @@ class Window(pyglet.window.Window):
         
         volume = np.zeros((10, 10, 10))
         
+        points = []
+        
         for blockPos in blocks.keys():
             # get vector from position to block
             # +1 on the y for eye height
             block_vec = (blockPos[0] - agentPos[0], blockPos[1] - agentPos[1] + 1, blockPos[2] - agentPos[2])
+            new_block_vec = block_vec
 
             # Translate block vec to original coordinates
             # unrotate about y axis
-            new_block_vec = self.rotateY(block_vec, math.radians(yAxisRot))
+#            new_block_vec = self.rotateY(block_vec, math.radians(yAxisRot))
             
             # unrotate about x axis
-            new_block_vec = self.rotateX(new_block_vec, math.radians(xAxisRot))
+#            new_block_vec = self.rotateX(new_block_vec, math.radians(xAxisRot))
             
             # untranslate x, y, z
-            new_block_vec = self.translate(new_block_vec, (-agentPos[0], -agentPos[1], -agentPos[2]))
+#            new_block_vec = self.translate(new_block_vec, (-agentPos[0], -agentPos[1], -agentPos[2]))
             #print ("Block vec", new_block_vec)
         
             # check if block is in xz FOV
             # check if block is in yz FOV
             if (self.isBlockInXZ_FOV(new_block_vec) and self.isBlockInYZ_FOV(new_block_vec)):
-                print ("In FOV")
+                #print ("In FOV")
                 # add to some 3d matrix
-                print (round(-new_block_vec[0]), round(-new_block_vec[1]), round(-new_block_vec[2]) )
-                volume[round(-new_block_vec[0])+5-1][round(-new_block_vec[1])-1][round(-new_block_vec[2])-1] = 1.0      
+                print ("FOV point: ", round(new_block_vec[0]), round(new_block_vec[1]), round(new_block_vec[2]) )
+                #volume[round(-new_block_vec[0])+5-1][round(-new_block_vec[1])-1][round(-new_block_vec[2])-1] = 1.0      
+                points.append(new_block_vec)
+                
+            raw_input("Enter")
 
-            #raw_input("Enter")
-
-        return volume
+        self.plot3d(points)        
         
+        return volume
+    
+    
+    def plot3d(self, points):
+        fig = plt.figure()
+        plt.ion()
+        ax = fig.add_subplot(111, projection='3d')
+        
+        c = 'r'
+        m = 'o'
+        
+        nPts = len(points)
+        xs = np.zeros((nPts,))
+        ys = np.zeros((nPts,))
+        zs = np.zeros((nPts,))
+        
+        for i in range(nPts):
+            xs[i] = points[i][0]
+            ys[i] = points[i][1]
+            zs[i] = points[i][2]
+            
+        ax.scatter(xs, ys, zs, c=c, marker=m)
+
+        ax.set_xlabel('X Label')
+        ax.set_ylabel('Y Label')
+        ax.set_zlabel('Z Label')
+        ax.set_ylim([-5,5])
+        ax.set_xlim([-5,5])
+        ax.set_zlim([-10,0])
+
+        plt.show()
+        raw_input("Enter: ")
+        plt.close()
 
         
     def rotateX(self, vec, theta):
@@ -574,12 +613,13 @@ class Window(pyglet.window.Window):
         """
         bx, by, bz = blockPos
 
-        opp = -bx
-        adj = -bz
-        theta = math.atan2(opp, adj)
+        opp = bx
+        adj = bz
+        if (adj == 0 or opp == 0): return False
+        theta = math.atan(opp / adj)
         degs = math.degrees(theta)
-        #print (blockPos, degs)
-        return degs <= (FOV / 2.0)
+        print (blockPos, degs)
+        return math.fabs(degs) <= (FOV / 2.0)
 
         
     def isBlockInYZ_FOV(self, blockPos):
@@ -588,12 +628,13 @@ class Window(pyglet.window.Window):
         """
         bx, by, bz = blockPos
         
-        opp = -by # minus so that in first quadrant, since looking towards negative z
-        adj = -bz
-        theta = math.atan2(opp, adj)
+        opp = by # minus so that in first quadrant, since looking towards negative z
+        adj = bz
+        if (adj == 0 or opp == 0): return False
+        theta = math.atan(opp / adj)
         degs = math.degrees(theta)
-        #print (blockPos, degs)
-        return degs <= (FOV / 2.0)
+        print (blockPos, degs)
+        return math.fabs(degs) <= (FOV / 2.0)
         
         
     def collide(self, position, height):
