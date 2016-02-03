@@ -110,7 +110,7 @@ def reset():
     
     
 if __name__ == "__main__":
-    init(True)
+    init(False)
     i = 0
     while i < 1000:
         img = get_screen()
@@ -122,7 +122,7 @@ if __name__ == "__main__":
             reset()
         else:
             #pass
-            r = act(0)
+            r = act(4)
             print ("reward = ", r)
         i += 1
         time.sleep(.05)

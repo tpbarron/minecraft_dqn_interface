@@ -519,17 +519,16 @@ class Window(pyglet.window.Window):
             # get vector from position to block
             # +1 on the y for eye height
             block_vec = (blockPos[0] - agentPos[0], blockPos[1] - agentPos[1] + 1, blockPos[2] - agentPos[2])
-            new_block_vec = block_vec
 
             # Translate block vec to original coordinates
             # unrotate about y axis
-#            new_block_vec = self.rotateY(block_vec, math.radians(yAxisRot))
+            new_block_vec = self.rotateY(block_vec, math.radians(yAxisRot))
             
             # unrotate about x axis
-#            new_block_vec = self.rotateX(new_block_vec, math.radians(xAxisRot))
+            new_block_vec = self.rotateX(new_block_vec, math.radians(xAxisRot))
             
             # untranslate x, y, z
-#            new_block_vec = self.translate(new_block_vec, (-agentPos[0], -agentPos[1], -agentPos[2]))
+            new_block_vec = self.translate(new_block_vec, (-agentPos[0], -agentPos[1], -agentPos[2]))
             #print ("Block vec", new_block_vec)
         
             # check if block is in xz FOV
@@ -541,8 +540,6 @@ class Window(pyglet.window.Window):
                 #volume[round(-new_block_vec[0])+5-1][round(-new_block_vec[1])-1][round(-new_block_vec[2])-1] = 1.0      
                 points.append(new_block_vec)
                 
-            raw_input("Enter")
-
         self.plot3d(points)        
         
         return volume
@@ -605,7 +602,10 @@ class Window(pyglet.window.Window):
                         [0, 0, 0, 1]])
         vecAnd1 = np.array([vec[0], vec[1], vec[2], 1])
         return np.dot(mat, vecAnd1)[:3]
-                    
+    
+    
+    def getEquivAtZero(self, angle):
+        return angle % 360 - 180           
       
     def isBlockInXZ_FOV(self, blockPos):
         """
@@ -615,10 +615,11 @@ class Window(pyglet.window.Window):
 
         opp = bx
         adj = bz
-        if (adj == 0 or opp == 0): return False
-        theta = math.atan(opp / adj)
+        #if (adj == 0 or opp == 0): return False
+        theta = math.atan2(opp, adj)
         degs = math.degrees(theta)
-        print (blockPos, degs)
+        degs = self.getEquivAtZero(degs)
+        print "XZ: ", (blockPos, degs)
         return math.fabs(degs) <= (FOV / 2.0)
 
         
@@ -630,10 +631,11 @@ class Window(pyglet.window.Window):
         
         opp = by # minus so that in first quadrant, since looking towards negative z
         adj = bz
-        if (adj == 0 or opp == 0): return False
-        theta = math.atan(opp / adj)
+        #if (adj == 0 or opp == 0): return False
+        theta = math.atan2(opp, adj)
         degs = math.degrees(theta)
-        print (blockPos, degs)
+        degs = self.getEquivAtZero(degs)
+        print "YZ: ", (blockPos, degs)
         return math.fabs(degs) <= (FOV / 2.0)
         
         
