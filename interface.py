@@ -110,7 +110,7 @@ def reset():
     
     
 if __name__ == "__main__":
-    init(False)
+    init(True)
     i = 0
     while i < 1000:
         img = get_screen()
