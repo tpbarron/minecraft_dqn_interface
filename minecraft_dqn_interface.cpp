@@ -51,7 +51,12 @@ void MinecraftInterface::initMethods() {
   if (!py_get_action_set || !PyCallable_Check(py_get_action_set)) {
     PyErr_Print();
   }
-  
+
+  py_get_volume = PyObject_GetAttrString(module, "get_volume");
+  if (!py_get_volume || !PyCallable_Check(py_get_volume)) {
+    PyErr_Print();
+  }
+    
   py_get_screen = PyObject_GetAttrString(module, "get_screen");
   if (!py_get_screen || !PyCallable_Check(py_get_screen)) {
     PyErr_Print();
@@ -121,6 +126,34 @@ std::vector<int> MinecraftInterface::get_action_set() {
 }
 
 
+std::vector<uint8_t> MinecraftInterface::get_volume() {
+  PyObject *pValue = PyObject_CallObject(py_get_volume, nullptr);
+  std::vector<uint8_t> volume;
+  
+  if (PyList_Check(pValue)) {
+    PyObject *iter = PyObject_GetIter(pValue);
+  
+    if (iter == nullptr) {
+      PyErr_Print();
+      exit(1);
+    }
+    
+    PyObject *item;
+    while ( (item = PyIter_Next(iter)) ) {
+      volume.push_back(static_cast<uint8_t>(PyInt_AsLong(item)));
+      Py_DECREF(item);
+    }
+    
+    Py_DECREF(iter);        
+  } else {
+    PyErr_Print();
+  }
+  
+  Py_DECREF(pValue);
+  return volume;
+}
+
+
 /*
  * Update the game state and get the current screen
  * as a vector of pixel values
@@ -133,9 +166,9 @@ std::shared_ptr<std::array<uint8_t, 7056> > MinecraftInterface::get_screen_as_ar
   if (PyList_Check(pValue)) {
     int width = 84, height = 84;
 
-    for (int i = 0; i < width * height; ++i) {
+    for (unsigned long i = 0; i < width * height; ++i) {
       PyObject *v = PyList_GetItem(pValue, i); // get the item at index i
-      (*screen)[i] = (uint8_t)PyInt_AsLong(v); // at the item to the vector
+      (*screen)[i] = static_cast<uint8_t>(PyInt_AsLong(v)); // at the item to the vector
       Py_DECREF(v);
     }
   } else {
@@ -188,6 +221,7 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
                                               (uchar)PyInt_AsLong(gr),
                                               (uchar)PyInt_AsLong(rd));
 					      }*/
+					Py_DECREF(v);
                 
         i+=channels;
       }
@@ -266,7 +300,8 @@ int main(int argc, char *argv[]) {
   int frameItr = 0;
   int gameItr = 0;
   while (gameItr < 2) {
-    cv::Mat screen = iface.get_screen(gameItr, frameItr);
+    std::vector<uint8_t> volume = iface.get_volume();
+    //cv::Mat screen = iface.get_screen(gameItr, frameItr);
     bool over = iface.is_game_over();
     if (over) {
       std::cout << "Finished game " << gameItr << ". Resetting..." << std::endl;

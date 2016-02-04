@@ -510,7 +510,7 @@ class Window(pyglet.window.Window):
         
         volume = np.zeros((side, side, side))
         
-        points = []
+        #points = []
         
         for blockPos in blocks.keys():
             # get vector from position to block
@@ -519,7 +519,7 @@ class Window(pyglet.window.Window):
             # check center 
             block_vec = (blockPos[0] - agentPos[0], blockPos[1] - (agentPos[1]), blockPos[2] - agentPos[2])
             if (self.checkPoint(block_vec, agentPos, agentRot)):
-                points.append(block_vec)
+                #points.append(block_vec)
                 volPoint = tuple([e*10.0 for e in block_vec])
                 x, y, z = volPoint
                 
@@ -548,20 +548,20 @@ class Window(pyglet.window.Window):
                 
                                  
             # check vertices            
-            blockVertices = cube_vertices(blockPos[0], blockPos[1], blockPos[2], 0.5)
-            for v in range(0, len(blockVertices), 3):
-                vertex = (blockVertices[v], blockVertices[v+1], blockVertices[v+2])
-                block_vec = (vertex[0] - agentPos[0], vertex[1] - (agentPos[1]), vertex[2] - agentPos[2])
+            #blockVertices = cube_vertices(blockPos[0], blockPos[1], blockPos[2], 0.5)
+            #for v in range(0, len(blockVertices), 3):
+            #    vertex = (blockVertices[v], blockVertices[v+1], blockVertices[v+2])
+            #    block_vec = (vertex[0] - agentPos[0], vertex[1] - (agentPos[1]), vertex[2] - agentPos[2])
                 
-                if (self.checkPoint(block_vec, agentPos, agentRot)):    
-                    points.append(block_vec)
+            #    if (self.checkPoint(block_vec, agentPos, agentRot)):    
+            #        points.append(block_vec)
                                 
-        self.plot3d(points)      
+        #self.plot3d(points)      
         
         return volume
     
     
-    def plot3d(self, points, size=10):
+    def plot3d(self, points, size=100):
         fig = plt.figure()
         plt.ion()
         ax = fig.add_subplot(111, projection='3d')
@@ -584,8 +584,12 @@ class Window(pyglet.window.Window):
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
-        ax.set_ylim([-(size/2-1),(size/2)])
-        ax.set_xlim([-(size/2-1),(size/2)])
+        #ax.set_ylim([-(size/2-1),(size/2)])
+        #ax.set_xlim([-(size/2-1),(size/2)])
+        #ax.set_zlim([-size-1,0])
+
+        ax.set_ylim([0, size-1])
+        ax.set_xlim([0, size-1])
         ax.set_zlim([-size-1,0])
 
         plt.show()
@@ -611,9 +615,9 @@ class Window(pyglet.window.Window):
         # check if block is in xz FOV
         # check if block is in yz FOV
         if (self.isBlockInXZ_FOV(new_block_vec) and self.isBlockInYZ_FOV(new_block_vec)):
-            print ("FOV point: ", new_block_vec[0], new_block_vec[1], new_block_vec[2])
-            
+            #print ("FOV point: ", new_block_vec[0], new_block_vec[1], new_block_vec[2])  
             return True
+            
         return False
         
         
@@ -663,7 +667,7 @@ class Window(pyglet.window.Window):
         theta = math.atan2(opp, adj)
         degs = math.degrees(theta)
         degs = self.getEquivAtZero(degs)
-        print "XZ: ", (blockPos, degs)
+        #print "XZ: ", (blockPos, degs)
         return math.fabs(degs) <= (FOV / 2.0)
 
         
@@ -679,7 +683,7 @@ class Window(pyglet.window.Window):
         theta = math.atan2(opp, adj)
         degs = math.degrees(theta)
         degs = self.getEquivAtZero(degs)
-        print "YZ: ", (blockPos, degs)
+        #print "YZ: ", (blockPos, degs)
         return math.fabs(degs) <= (FOV / 2.0)
         
         

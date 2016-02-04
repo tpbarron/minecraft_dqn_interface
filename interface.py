@@ -54,13 +54,13 @@ def get_volume():
     Get a representation of the 3D environment
     """
     volume = window.get_volume()
-    for i in range(volume.shape[0]):
-        for j in range(volume.shape[1]):
-            for k in range(volume.shape[2]):
-                if (volume[i][j][k] != 0):
-                    print (i, j, k) #volume[i][j][k])
-    
-    return list(volume)
+    #for i in range(volume.shape[0]):
+    #    for j in range(volume.shape[1]):
+    #        for k in range(volume.shape[2]):
+    #            if (volume[i][j][k] != 0):
+    #                print (i, j, k) #volume[i][j][k])
+    #print len(list(volume.flatten()))
+    return list(volume.flatten())
 
 
 def act(action):
@@ -110,7 +110,7 @@ def reset():
     
     
 if __name__ == "__main__":
-    init(True)
+    init(False)
     i = 0
     while i < 1000:
         img = get_screen()
