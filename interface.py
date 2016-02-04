@@ -110,11 +110,11 @@ def reset():
     
     
 if __name__ == "__main__":
-    init(False)
+    init(True)
     i = 0
     while i < 1000:
-        img = get_screen()
-        get_volume()
+        #img = get_screen()
+        vol = get_volume()
         #cv2.imwrite("image.png", img)
         over = is_game_over()
         if (over):
@@ -125,6 +125,6 @@ if __name__ == "__main__":
             r = act(4)
             print ("reward = ", r)
         i += 1
-        time.sleep(.05)
+        #time.sleep(.05)
               
 

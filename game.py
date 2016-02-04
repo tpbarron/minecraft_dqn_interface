@@ -22,6 +22,8 @@ from DeepMindPlayer import DeepMindPlayer
 
 # field of view
 FOV = 65.0
+FOV_PLAYER = 90.0
+
 
 class Model(object):
 
@@ -531,8 +533,9 @@ class Window(pyglet.window.Window):
                 miny = int(round(y - 5.0 + 49.0))
                 maxy = int(round(y + 5.0 + 49.0))
                 
-                minz = int(round(z - 5.0))
-                maxz = int(round(z + 5.0))
+                # flip z's into the positive side
+                minz = -int(round(z + 5.0))
+                maxz = -int(round(z - 5.0))
                 
                 #print ("bounds: ", minx, maxx, miny, maxy, minz, maxz)
                 
@@ -541,7 +544,7 @@ class Window(pyglet.window.Window):
                         for zs in range(minz, maxz, 1):
                             if (xs >= 0 and xs < 100):
                                 if (ys >= 0 and ys < 100):
-                                    if (zs >= -99 and zs <= 0):
+                                    if (zs >= 0 and zs < 100):
                                         #print ("adding point: ", (xs, ys, zs))
                                         #points.append((xs, ys, zs))
                                         volume[xs][ys][zs] = 1
@@ -590,7 +593,7 @@ class Window(pyglet.window.Window):
 
         ax.set_ylim([0, size-1])
         ax.set_xlim([0, size-1])
-        ax.set_zlim([-size-1,0])
+        ax.set_zlim([0, size-1])
 
         plt.show()
         raw_input("Enter: ")
@@ -668,7 +671,7 @@ class Window(pyglet.window.Window):
         degs = math.degrees(theta)
         degs = self.getEquivAtZero(degs)
         #print "XZ: ", (blockPos, degs)
-        return math.fabs(degs) <= (FOV / 2.0)
+        return math.fabs(degs) <= (FOV_PLAYER / 2.0)
 
         
     def isBlockInYZ_FOV(self, blockPos):
@@ -684,7 +687,7 @@ class Window(pyglet.window.Window):
         degs = math.degrees(theta)
         degs = self.getEquivAtZero(degs)
         #print "YZ: ", (blockPos, degs)
-        return math.fabs(degs) <= (FOV / 2.0)
+        return math.fabs(degs) <= (FOV_PLAYER / 2.0)
         
         
     def collide(self, position, height):
