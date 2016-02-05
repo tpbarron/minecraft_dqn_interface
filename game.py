@@ -500,7 +500,7 @@ class Window(pyglet.window.Window):
         return screenshot
         
 
-    def get_volume(self, side=100):
+    def get_volume(self, side=20):
         # Alternative possibility
         # Rotate pos to block vector by -player rot
         # Sight vector will just be neg z
@@ -527,11 +527,11 @@ class Window(pyglet.window.Window):
                 
                 #print ("vol point = ", volPoint)
                 # +49 since origin at center
-                minx = int(round(x - 5.0 + 49.0))
-                maxx = int(round(x + 5.0 + 49.0))
+                minx = int(round(x - 5.0 + side/2.0 - 1))
+                maxx = int(round(x + 5.0 + side/2.0 - 1))
                 
-                miny = int(round(y - 5.0 + 49.0))
-                maxy = int(round(y + 5.0 + 49.0))
+                miny = int(round(y - 5.0 + side/2.0 - 1))
+                maxy = int(round(y + 5.0 + side/2.0 - 1))
                 
                 # flip z's into the positive side
                 minz = -int(round(z + 5.0))
@@ -542,9 +542,9 @@ class Window(pyglet.window.Window):
                 for xs in range(minx, maxx, 1):
                     for ys in range(miny, maxy, 1):
                         for zs in range(minz, maxz, 1):
-                            if (xs >= 0 and xs < 100):
-                                if (ys >= 0 and ys < 100):
-                                    if (zs >= 0 and zs < 100):
+                            if (xs >= 0 and xs < side):
+                                if (ys >= 0 and ys < side):
+                                    if (zs >= 0 and zs < side):
                                         #print ("adding point: ", (xs, ys, zs))
                                         #points.append((xs, ys, zs))
                                         volume[xs][ys][zs] = 1
@@ -564,7 +564,7 @@ class Window(pyglet.window.Window):
         return volume
     
     
-    def plot3d(self, points, size=100):
+    def plot3d(self, points, size=20):
         fig = plt.figure()
         plt.ion()
         ax = fig.add_subplot(111, projection='3d')
