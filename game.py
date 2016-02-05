@@ -500,7 +500,7 @@ class Window(pyglet.window.Window):
         return screenshot
         
 
-    def get_volume(self, side=20):
+    def get_volume(self, side=20.0):
         # Alternative possibility
         # Rotate pos to block vector by -player rot
         # Sight vector will just be neg z
@@ -520,22 +520,22 @@ class Window(pyglet.window.Window):
             
             # check center 
             block_vec = (blockPos[0] - agentPos[0], blockPos[1] - (agentPos[1]), blockPos[2] - agentPos[2])
+            offset = side / 10.0 / 2.0
             if (self.checkPoint(block_vec, agentPos, agentRot)):
                 #points.append(block_vec)
-                volPoint = tuple([e*10.0 for e in block_vec])
-                x, y, z = volPoint
+                x, y, z = tuple([e*side/10.0 for e in block_vec])
                 
                 #print ("vol point = ", volPoint)
                 # +49 since origin at center
-                minx = int(round(x - 5.0 + side/2.0 - 1))
-                maxx = int(round(x + 5.0 + side/2.0 - 1))
+                minx = int(round(x - offset + side/2.0 - 1))
+                maxx = int(round(x + offset + side/2.0 - 1))
                 
-                miny = int(round(y - 5.0 + side/2.0 - 1))
-                maxy = int(round(y + 5.0 + side/2.0 - 1))
+                miny = int(round(y - offset + side/2.0 - 1))
+                maxy = int(round(y + offset + side/2.0 - 1))
                 
                 # flip z's into the positive side
-                minz = -int(round(z + 5.0))
-                maxz = -int(round(z - 5.0))
+                minz = -int(round(z + offset))
+                maxz = -int(round(z - offset))
                 
                 #print ("bounds: ", minx, maxx, miny, maxy, minz, maxz)
                 
@@ -564,7 +564,7 @@ class Window(pyglet.window.Window):
         return volume
     
     
-    def plot3d(self, points, size=20):
+    def plot3d(self, points, size=20.0):
         fig = plt.figure()
         plt.ion()
         ax = fig.add_subplot(111, projection='3d')
