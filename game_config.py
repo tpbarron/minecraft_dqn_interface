@@ -1,6 +1,7 @@
 import Action
 import random
 import os
+
 from game_globals import *
 
 ##############################
@@ -25,13 +26,6 @@ MAXIMUM_GAME_FRAMES = 500
 # Agent's turning speed (per tick)
 AGENT_ROTATION_SPEED = 1.50
 WALKING_SPEED = 1.0
-
-# World generation parameters
-WORLD_WIDTH = 5  # width in both directions from start
-WORLD_DEPTH = 5  # depth in both directions from start
-NUMBER_GRASS_BLOCKS = 8  # number of dirt blocks to add randomly through world
-NUMBER_BRICK_BLOCKS = 7 # number of brick blocks to add randomly through world
-MAX_BLOCK_HEIGHT = 5 # The maximum height of blocks placed in the world
 
 # How often to print out the total number of frames 
 #COUNTER_DISPLAY_FREQUENCY = 1000
@@ -60,12 +54,22 @@ EXISTENCE_PENALTY = 0
 # If you get all the penalties, then you get zero
 STARTING_REWARD = SWING_PENALTY + EXISTENCE_PENALTY
 
-#################################################
+
+#
+# Tasks
+#
+WALKWAY = 0
+BIG_WORLD = 1
+
+TASK = WALKWAY
+
+#
 # Game Actions 
 #
 # The interface using the legal action list for training. Define your actions 
 # below and update the legal actions array to define which ones are valid
-################################################
+#
+
 LEGAL_ACTIONS = [0, 1, 2, 3, 4, 5, 6]
 
 GAME_ACTIONS = [
@@ -137,89 +141,3 @@ GAME_ACTIONS = [
     #6 Rotate down
     Action.Action(False, updown_rot=-AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0)
 ]
-
-
-###############
-# Build World #
-###############
-GROUND = -2
-WALL_HEIGHT = 2
-
-def saveWorld(locations, filename):
-    o = open(MAPS_PATH + os.sep + filename, 'w')
-    for location in locations:
-        o.write("%d %d %d %s\n" % location)
-    o.close()
-    
-def generateTower(locations, texture):
-    randomX = random.randrange(-WORLD_WIDTH+1, WORLD_WIDTH-1)
-    randomZ = random.randrange(-WORLD_DEPTH+1, WORLD_DEPTH-1)
-    # Don't make it the ground or the agent could fall through if it breaks it...
-    randomY = GROUND + 1 + random.randrange(MAX_BLOCK_HEIGHT)
-    
-    locations.append((randomX, randomY, randomZ, texture))
-    
-    return locations
-    
-
-def generateFlatWorld(locations):
-    # Make the flat ground
-    for i in range(-WORLD_WIDTH, WORLD_WIDTH):
-        for j in range(-WORLD_DEPTH, WORLD_DEPTH):
-            locations.append((i, GROUND, j, "STONE"))
-
-    # Put walls around the outside
-    for i in range(-2, WALL_HEIGHT):
-        for j in range(-WORLD_DEPTH, WORLD_DEPTH):
-            locations.append((-WORLD_WIDTH, i, j, "STONE"))
-            locations.append((WORLD_WIDTH, i, j, "STONE"))
-        for j in range(-WORLD_WIDTH, WORLD_WIDTH):
-            locations.append((j, i, -WORLD_DEPTH, "STONE"))
-            locations.append((j, i, WORLD_DEPTH, "STONE"))
-    return locations
-
-
-def generateWalkwayWorld(locations):    
-    # a block to start on
-    locations.append((0, GROUND, 0, "STONE"))
-  
-    # Make a snaking walkway
-    i = 0
-    j = 0
-    block_count = 0
-    while block_count < 10:
-        locations.append((i, GROUND, j, "STONE"))
-        #if random.random() < 0.1:
-        #    locations.append((i, GROUND+1, j, "GRASS"))
-        new_i = random.randrange(i-1, i+2)
-        if new_i != i:
-            locations.append((new_i, GROUND, j, "STONE"))
-        j = j-1           
-        i = new_i
-        block_count += 1
-
-    return locations
-    
-    
-def generateShortEasyWalkwayWorld(locations):    
-    # a block to start on
-    locations.append((0, GROUND, 0, "STONE"))
-    for i in range(100):
-        locations.append((0, GROUND, -i, "STONE"))
-
-    return locations
-
-#####################################
-# This function gets called mid game
-# Implement it to define your task
-#####################################
-def generateGameWorld(filename):
-    locs = []
-    locs = generateWalkwayWorld(locs)
-#    locs = generateFlatWorld(locs)
-#    for i in range(NUMBER_GRASS_BLOCKS):
-#        locs = generateTower(locs, "GRASS")
-#    for i in range(NUMBER_BRICK_BLOCKS):
-#        locs = generateTower(locs, "BRICK")
-    saveWorld(locs, filename)
-

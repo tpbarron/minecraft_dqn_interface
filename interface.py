@@ -20,11 +20,11 @@ def init(evaluate):
 
     window.set_phase(evaluate)
 
-    p = DeepMindPlayer()
+    p = Player()
     window.set_player(p)
     p.setGame(window)
     world_file = "/test%d.txt" % random.randrange(10)
-    generateGameWorld(world_file)
+    p.task.generateGameWorld(world_file)
     window.model.loadMap(world_file)
     opengl_setup()
     return "Successfully initialized"
@@ -96,7 +96,7 @@ def reset():
     
     
 if __name__ == "__main__":
-    init(True)
+    init(False)
     i = 0
     while i < 1000:
         img = get_screen()
