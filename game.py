@@ -11,11 +11,10 @@ from pyglet.window import key, mouse
 
 from PIL import Image
 
-from game_globals import *
-from game_config import *
+import game_globals
+import game_config
 
 from Player import Player
-from DeepMindPlayer import DeepMindPlayer
 
 class Model(object):
 
@@ -25,7 +24,7 @@ class Model(object):
         self.batch = pyglet.graphics.Batch()
 
         # A TextureGroup manages an OpenGL texture.
-        self.group = TextureGroup(image.load(TEXTURE_PATH).get_texture())
+        self.group = TextureGroup(image.load(game_config.TEXTURE_PATH).get_texture())
 
         # A mapping from position to the texture of the block at that position.
         # This defines all the blocks that are currently in the world.
@@ -50,16 +49,16 @@ class Model(object):
 
     def loadMap(self, level):
         #f = open("world.txt", 'r')
-        f = open(MAPS_PATH + '/' + level, 'r')
+        f = open(game_config.MAPS_PATH + '/' + level, 'r')
         for line in f:
             x, y, z, kind = line.split()
             x, y, z = float(x), float(y), float(z)
             if kind == "GRASS":
-                self.add_block((x, y, z), GRASS, immediate=False)
+                self.add_block((x, y, z), game_globals.GRASS, immediate=False)
             elif kind == "STONE":
-                self.add_block((x, y, z), STONE, immediate=False)
+                self.add_block((x, y, z), game_globals.STONE, immediate=False)
             elif kind == "BRICK":
-                self.add_block((x, y, z), BRICK, immediate=False)
+                self.add_block((x, y, z), game_globals.BRICK, immediate=False)
             #self.add_block((x, y - 3, z), STONE, immediate=False)
                 
         f.close()
@@ -86,7 +85,7 @@ class Model(object):
         dx, dy, dz = vector
         previous = None
         for _ in xrange(max_distance * m):
-            key = normalize((x, y, z))
+            key = game_globals.normalize((x, y, z))
             if key != previous and key in self.world:
                 return key, previous
             previous = key
@@ -99,12 +98,12 @@ class Model(object):
 
         """
         x, y, z = position
-        for dx, dy, dz in FACES:
+        for dx, dy, dz in game_globals.FACES:
             if (x + dx, y + dy, z + dz) not in self.world:
                 return True
         return False
 
-    def add_block(self, position, texture=GRASS, immediate=True):
+    def add_block(self, position, texture=game_globals.GRASS, immediate=True):
         """ Add a block with the given `texture` and `position` to the world.
 
         Parameters
@@ -121,7 +120,7 @@ class Model(object):
         if position in self.world:
             self.remove_block(position, immediate)
         self.world[position] = texture
-        self.sectors.setdefault(sectorize(position), []).append(position)
+        self.sectors.setdefault(game_globals.sectorize(position), []).append(position)
         if immediate:
             if self.exposed(position):
                 self.show_block(position)
@@ -139,7 +138,7 @@ class Model(object):
 
         """
         del self.world[position]
-        self.sectors[sectorize(position)].remove(position)
+        self.sectors[game_globals.sectorize(position)].remove(position)
         if immediate:
             if position in self.shown:
                 self.hide_block(position)
@@ -201,7 +200,7 @@ class Model(object):
 
         """
         x, y, z = position
-        vertex_data = cube_vertices(x, y, z, 0.5)
+        vertex_data = game_globals.cube_vertices(x, y, z, 0.5)
         texture_data = list(texture)
         # create vertex list
         # FIXME Maybe `add_indexed()` should be used instead
@@ -379,10 +378,10 @@ class Window(pyglet.window.Window):
         self.sector = None
         self.reticle = None
         self.game_over = False
-        self.player = DeepMindPlayer()
+        self.player = Player()
         self.player.setGame(self)
         world_file = "test%d.txt" % random.randrange(10)
-        generateGameWorld(world_file)
+        self.player.task.generateGameWorld(world_file)
         self.model.loadMap(world_file)
         self.set_grayscale()       
 
@@ -433,11 +432,11 @@ class Window(pyglet.window.Window):
         """
      
         self.world_counter += 1
-        if self.world_counter >= MAXIMUM_GAME_FRAMES:
+        if self.world_counter >= game_config.MAXIMUM_GAME_FRAMES:
             self.game_over = True
      
         self.model.process_queue()
-        sector = sectorize(self.player.position)
+        sector = game_globals.sectorize(self.player.position)
         if sector != self.sector:
             self.model.change_sectors(self.sector, sector)
             if self.sector is None:
@@ -460,7 +459,7 @@ class Window(pyglet.window.Window):
 
         """
         # walking
-        speed = FLYING_SPEED if self.player.flying else WALKING_SPEED
+        speed = FLYING_SPEED if self.player.flying else game_config.WALKING_SPEED
         d = dt * speed # distance covered this tick.
         dx, dy, dz = self.player.get_motion_vector()
         # New position in space, before accounting for gravity.
@@ -470,12 +469,12 @@ class Window(pyglet.window.Window):
             # Update your vertical speed: if you are falling, speed up until you
             # hit terminal velocity; if you are jumping, slow down until you
             # start falling.
-            self.player.dy -= dt * GRAVITY
-            self.player.dy = max(self.player.dy, -TERMINAL_VELOCITY)
+            self.player.dy -= dt * game_globals.GRAVITY
+            self.player.dy = max(self.player.dy, -game_globals.TERMINAL_VELOCITY)
             dy += self.player.dy * dt
         # collisions
         x, y, z = self.player.position
-        x, y, z = self.collide((x + dx, y + dy, z + dz), PLAYER_HEIGHT)
+        x, y, z = self.collide((x + dx, y + dy, z + dz), game_globals.PLAYER_HEIGHT)
         self.player.position = (x, y, z)
 
 
@@ -539,8 +538,8 @@ class Window(pyglet.window.Window):
         # tall grass. If >= .5, you'll fall through the ground.
         pad = 0.25
         p = list(position)
-        np = normalize(position)
-        for face in FACES:  # check all surrounding blocks
+        np = game_globals.normalize(position)
+        for face in game_globals.FACES:  # check all surrounding blocks
             for i in xrange(3):  # check each dimension independently
                 if not face[i]:
                     continue

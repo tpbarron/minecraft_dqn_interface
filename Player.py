@@ -4,9 +4,14 @@ import math
 import random
 
 import Action
-from game_config import *
 
-class Player:
+from tasks.Task import Task
+from tasks.Walkway import Walkway
+
+import game_config
+
+
+class Player(object):
 
     def __init__(self):
 
@@ -56,9 +61,20 @@ class Player:
         
         self.prev_max_z = 0
         self.should_end_game = False
+        
+        self.actions = game_config.GAME_ACTIONS
 
-        assert STARTING_REWARD >= EXISTENCE_PENALTY + SWING_PENALTY, "Penalties too high!"
+        self.task = self.createTask()
 
+        assert game_config.STARTING_REWARD >= game_config.EXISTENCE_PENALTY + game_config.SWING_PENALTY, "Penalties too high!"
+        
+
+    def createTask(self):
+        if (game_config.TASK == game_config.WALKWAY):
+            return Walkway()
+        else:
+            print("Please set valid task in game_config")
+            return None
 
     def endGameEarly(self):
         return self.should_end_game
@@ -204,45 +220,27 @@ class Player:
                 return "SAND"
         else:
             return ""
-                
-    def performActionPlayer(self, a):
+            
+            
+    def performAction(self, actionIndex):
         """
         Perform an action by setting the agent's movement fields to the values from the action object
         NOTE: the break block action should be handled in the getReward method
         """
+        act = self.actions[actionIndex]
+        
         #print ("Player perform action")
-        self.strafe[0] = a.forwardbackward_walk
-        self.strafe[1] = a.leftright_walk
+        self.strafe[0] = act.forwardbackward_walk
+        self.strafe[1] = act.leftright_walk
         
-        self.looking[0] = a.leftright_rotation
-        self.looking[1] = a.updown_rotation
-    
-    
-    def getRewardPlayer(self, a):
-        #print ("Player get reward")
-        # Initialize a new reward for this current action
-        reward = STARTING_REWARD
-            
-        # Each part of the action might have a cost or reward
-        # E.g. Moving might have an energy cost
-        # E.g. Breaking blocks might be good or bad; reward or penalty
+        self.looking[0] = act.leftright_rotation
+        self.looking[1] = act.updown_rotation
+
+
+    def getReward(self, actionIndex):      
+        #print ("DeepMindPlayer doAction: ", actionIndex)
+        #act = self.actions[actionIndex]
+        # carry out the action
+        return self.task.getReward(self) 
         
-        # Check if farther than before. Then give reward.
-        # Going away in the z dir is negative.
-        # by rounding, the max score should be the z dist of the path
-        #print (self.position)
-        if (self.position[2] < self.prev_max_z):
-          self.prev_max_z = self.position[2]
-          reward = 1
-        elif (self.position[2] > self.prev_max_z):
-          reward = -1
-
-        if (self.position[1] < -1):
-          # the player fell, end the game early
-          self.should_end_game = True
-          reward = 0 #-1
-
-        #print ("Player reward = ", reward)
-        return reward
-
-
+        
