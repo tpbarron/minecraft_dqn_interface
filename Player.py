@@ -192,12 +192,16 @@ class Player:
             texture = self.game.model.world[block]
             if texture == GRASS:
                 #print "REMOVING BLOCK"
-                self.game.model.remove_block(block)
+                self.game.model.try_remove_block(block)
                 return "GRASS"
             elif texture == STONE:
                 return "STONE"
             elif texture == BRICK:
+                self.game.model.try_remove_block(block)
                 return "BRICK"
+            elif texture == SAND:
+                self.game.model.try_remove_block(block)
+                return "SAND"
         else:
             return ""
                 
