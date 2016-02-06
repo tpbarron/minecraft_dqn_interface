@@ -342,6 +342,9 @@ class Window(pyglet.window.Window):
         # Instance of the model that handles the world.
         self.model = Model()
 
+        # Number of games played
+        self.game_counter = 0
+        
         # Number of ticks gone by in the world
         self.world_counter = 0
 
@@ -367,12 +370,10 @@ class Window(pyglet.window.Window):
 
 
     def reset(self):
+        self.set_rgb();
         # Setup grayscale conversion color component scaling values
-        glPixelTransferf(GL_RED_SCALE, 1)
-        glPixelTransferf(GL_GREEN_SCALE, 1)
-        glPixelTransferf(GL_BLUE_SCALE, 1)
-    
         self.model = Model()
+        self.game_counter += 1
         self.world_counter = 0
         self.exclusive = False
         self.sector = None
@@ -383,12 +384,25 @@ class Window(pyglet.window.Window):
         world_file = "test%d.txt" % random.randrange(10)
         generateGameWorld(world_file)
         self.model.loadMap(world_file)
-        #self.set_game_frame_limit(10000) ??
-        
+        self.set_grayscale()       
+
+    def set_grayscale(self):
+        """
+        Set pixel proportions to gray scale
+        """
         glPixelTransferf(GL_RED_SCALE, 0.299)
         glPixelTransferf(GL_GREEN_SCALE, 0.587)
         glPixelTransferf(GL_BLUE_SCALE, 0.114)
-       
+
+
+    def set_rgb(self):
+        """
+        Set pixel proportions to color
+        """
+        glPixelTransferf(GL_RED_SCALE, 1.0)
+        glPixelTransferf(GL_GREEN_SCALE, 1.0)
+        glPixelTransferf(GL_BLUE_SCALE, 1.0)
+
 
     def set_phase(self, evaluate):
         self.evaluate = evaluate
@@ -467,13 +481,13 @@ class Window(pyglet.window.Window):
 
     def get_screen(self):
         """Get a screen shot of the current game state"""
-
         PIXEL_BYTE_SIZE = 1  # Use 1 for grayscale, 4 for RGBA
         # Initialize an array to store the screenshot pixels
         screenshot = (GLubyte * (PIXEL_BYTE_SIZE * self.width * self.height))(0)
         # Grab a screenshot
         # Use GL_RGB for color and GL_LUMINANCE for grayscale!
         #glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot)
+        # Setup grayscale conversion color component scaling values
         glReadPixels(0, 0, self.width, self.height, GL_LUMINANCE, GL_UNSIGNED_BYTE, screenshot)
 
         if (self.evaluate):
@@ -481,13 +495,23 @@ class Window(pyglet.window.Window):
             image = Image.fromstring(mode="L", size=(self.width, self.height),
                                      data=screenshot)
             image = image.resize((TRAIN_WINDOW_SIZE, TRAIN_WINDOW_SIZE))
-            
-            #image.save("frame.png")
+
+            #image.save("screenshots/frame%08d.png" % self.world_counter)
             screenshot = image.getdata()
             #print (list(screenshot))
             #print (len(list(screenshot)))
             #image.show()
             #raw_input("Enter")
+
+            if ANIMATION_GENERATION:
+                PIXEL_BYTE_SIZE_RGB = 4  # Use 1 for grayscale, 4 for RGBA
+                screenshot_rgb = (GLubyte * (PIXEL_BYTE_SIZE_RGB * self.width * self.height))(0)
+                self.set_rgb()
+                glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot_rgb)
+                self.set_grayscale();
+                im_rgb = Image.frombytes(mode="RGB", size=(TEST_WINDOW_SIZE, TEST_WINDOW_SIZE), data=screenshot_rgb)
+                #print "SAVING screenshots/frame%08d_%08d.png" % (self.game_counter, self.world_counter/4)
+                im_rgb.save("screenshots/frame%08d_%08d.png" % (self.game_counter, self.world_counter/4))
 
         return screenshot
         

@@ -12,6 +12,8 @@ from game_globals import *
 TEST_WINDOW_SIZE = 600
 TRAIN_WINDOW_SIZE = 84
 
+ANIMATION_GENERATION = True
+
 # The width and height of the image sent to DeepMind
 #SCALED_WINDOW_SIZE = 84
 
