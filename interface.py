@@ -14,9 +14,9 @@ def init(evaluate):
     print ("Initialing in evaluate mode: ", evaluate)
 
     if (evaluate):
-        window = Window(width=TEST_WINDOW_SIZE, height=TEST_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
+        window = Window(width=game_config.TEST_WINDOW_SIZE, height=game_config.TEST_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
     else:
-        window = Window(width=TRAIN_WINDOW_SIZE, height=TRAIN_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
+        window = Window(width=game_config.TRAIN_WINDOW_SIZE, height=game_config.TRAIN_WINDOW_SIZE, caption='Minecraft', resizable=False, vsync=False)
 
     window.set_phase(evaluate)
 

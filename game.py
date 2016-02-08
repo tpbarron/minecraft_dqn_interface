@@ -493,7 +493,7 @@ class Window(pyglet.window.Window):
             # need to scale screen
             image = Image.fromstring(mode="L", size=(self.width, self.height),
                                      data=screenshot)
-            image = image.resize((TRAIN_WINDOW_SIZE, TRAIN_WINDOW_SIZE))
+            image = image.resize((game_config.TRAIN_WINDOW_SIZE, game_config.TRAIN_WINDOW_SIZE))
 
             #image.save("screenshots/frame%08d.png" % self.world_counter)
             screenshot = image.getdata()
@@ -502,13 +502,13 @@ class Window(pyglet.window.Window):
             #image.show()
             #raw_input("Enter")
 
-            if ANIMATION_GENERATION:
+            if game_config.ANIMATION_GENERATION:
                 PIXEL_BYTE_SIZE_RGB = 4  # Use 1 for grayscale, 4 for RGBA
                 screenshot_rgb = (GLubyte * (PIXEL_BYTE_SIZE_RGB * self.width * self.height))(0)
                 self.set_rgb()
                 glReadPixels(0, 0, self.width, self.height, GL_RGB, GL_UNSIGNED_BYTE, screenshot_rgb)
                 self.set_grayscale();
-                im_rgb = Image.frombytes(mode="RGB", size=(TEST_WINDOW_SIZE, TEST_WINDOW_SIZE), data=screenshot_rgb)
+                im_rgb = Image.frombytes(mode="RGB", size=(game_config.TEST_WINDOW_SIZE, game_config.TEST_WINDOW_SIZE), data=screenshot_rgb)
                 #print "SAVING screenshots/frame%08d_%08d.png" % (self.game_counter, self.world_counter/4)
                 im_rgb.save("screenshots/frame%08d_%08d.png" % (self.game_counter, self.world_counter/4))
 
