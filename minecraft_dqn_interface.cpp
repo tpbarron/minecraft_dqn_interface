@@ -223,10 +223,11 @@ int MinecraftInterface::act(int action) {
   PyObject *pValue = PyObject_CallObject(py_act, pAction);
   int ret = 0;
   if (PyInt_Check(pValue)) {
-    ret = (int)PyInt_AsLong(pValue);
+    ret = static_cast<int>(PyInt_AsLong(pValue));
   } else {
     PyErr_Print();
   }
+
   Py_DECREF(pAction);
   Py_DECREF(pValue);
   //std::cout << "minecraft interface reward = " << ret << std::endl;
@@ -265,7 +266,7 @@ int main(int argc, char *argv[]) {
   
   int frameItr = 0;
   int gameItr = 0;
-  while (gameItr < 2) {
+  while (gameItr < 20) {
     cv::Mat screen = iface.get_screen(gameItr, frameItr);
     bool over = iface.is_game_over();
     if (over) {

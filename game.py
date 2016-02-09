@@ -673,7 +673,7 @@ class Window(pyglet.window.Window):
         block = self.model.hit_test(self.player.position, vector)[0]
         if block:
             x, y, z = block
-            vertex_data = cube_vertices(x, y, z, 0.51)
+            vertex_data = game_globals.cube_vertices(x, y, z, 0.51)
             glColor3d(0, 0, 0)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
             pyglet.graphics.draw(24, GL_QUADS, ('v3f/static', vertex_data))
