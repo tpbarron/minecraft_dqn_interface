@@ -369,16 +369,17 @@ class Window(pyglet.window.Window):
 
 
     def reset(self):
+        self.game_counter += 1
+        self.player.task.reset(self.game_counter, self.player.total_score)
         self.set_rgb();
         # Setup grayscale conversion color component scaling values
         self.model = Model()
-        self.game_counter += 1
         self.world_counter = 0
         self.exclusive = False
         self.sector = None
         self.reticle = None
         self.game_over = False
-        self.player = Player()
+        self.player.reset()
         self.player.setGame(self)
         world_file = "test%d.txt" % random.randrange(10)
         self.player.task.generateGameWorld(world_file)

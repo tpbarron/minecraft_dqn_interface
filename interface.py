@@ -98,16 +98,20 @@ def reset():
 if __name__ == "__main__":
     init(False)
     i = 0
+    total_reward = 0
     while i < 1000:
         img = get_screen()
         #cv2.imwrite("image.png", img)
         over = is_game_over()
         if (over):
+            print ("Total reward: ", total_reward)
+            total_reward = 0
             print ("Resetting game")
             reset()
         else:
             #pass
             r = act(2)
+            total_reward += r
             print ("reward = ", r)
         i += 1
         time.sleep(.05)
