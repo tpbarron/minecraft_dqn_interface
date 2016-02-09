@@ -3,15 +3,15 @@ Complex Walkway task specific code
 """
 
 import random
-
+from collections import deque
 from Task import Task
 import game_config
 
 class Complex_Walkway(Task):
     def __init__(self):
         self.complexity = 0
-        self.average_number = 100
-        self.total_score = 0
+        self.average_number = 250
+        self.previous_scores = deque([], self.average_number)
         self.level_up_score = 50
     
     def generateGameWorld(self, filename):
@@ -66,12 +66,14 @@ class Complex_Walkway(Task):
         return reward
 
     def reset(self, game_counter, game_score):
-        self.total_score += game_score
-        print("TOTAL SCORE: ", self.total_score)
+        # Use a moving average of the previous 500 games played
+        self.previous_scores.append(game_score)
         # Every average_number of games check if the player has the minimal average score to level up
-        if game_counter % self.average_number == 0:
-            if self.total_score / self.average_number >= self.level_up_score:
+        if len(self.previous_scores) == self.average_number:
+            average = sum(self.previous_scores) / self.average_number
+            print self.average_number,  "Game Average:", average
+            if average >= self.level_up_score:
                 self.complexity += 1
-                self.total_score = 0
+                print "INCREASED COMPLEXITY TO:", self.complexity
                 game_config.MAXIMUM_GAME_FRAMES = 640 + self.complexity * 320
         return self.complexity

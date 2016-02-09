@@ -103,7 +103,6 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("-n", action="store_false", dest="sleep", default=True)
     (options, args) = parser.parse_args()
-    print "OP: ", options
     while i < 1000:
         img = get_screen()
         #cv2.imwrite("image.png", img)
