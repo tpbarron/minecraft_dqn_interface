@@ -7,6 +7,7 @@ import Action
 
 from tasks.Task import Task
 from tasks.Walkway import Walkway
+from tasks.Complex_Walkway import Complex_Walkway
 
 import game_config
 
@@ -57,7 +58,7 @@ class Player(object):
         
         #self.previous_reward = 0
         
-        #self.total_score = 0
+        self.total_score = 0
         
         self.prev_max_z = 0
         self.should_end_game = False
@@ -67,11 +68,59 @@ class Player(object):
         self.task = self.createTask()
 
         assert game_config.STARTING_REWARD >= game_config.EXISTENCE_PENALTY + game_config.SWING_PENALTY, "Penalties too high!"
+
+    def reset(self):
+        # A list of blocks the player can place. Hit num keys to cycle.
+        #self.inventory = [BRICK, GRASS, SAND]
+        self.game = None
         
+        # When flying gravity has no effect and speed is increased.
+        self.flying = False
+        
+        # Current (x, y, z) position in the world, specified with floats. Note
+        # that, perhaps unlike in math class, the y-axis is the vertical axis.
+        self.position = (0, 0, 0)
+        
+        # First element is rotation of the player in the x-z plane (ground
+        # plane) measured from the z-axis down. The second is the rotation
+        # angle from the ground plane up. Rotation is in degrees.
+        #
+        # The vertical plane rotation ranges from -90 (looking straight down) to
+        # 90 (looking straight up). The horizontal rotation range is unbounded.
+        self.rotation = (0, 0)
+        
+        # Looking up/down or left/right?
+        self.looking = [0, 0]
+
+        # Strafing is moving lateral to the direction you are facing,
+        # e.g. moving to the left or right while continuing to face forward.
+        #
+        # First element is -1 when moving forward, 1 when moving back, and 0
+        # otherwise. The second element is -1 when moving left, 1 when moving
+        # right, and 0 otherwise.
+        self.strafe = [0, 0]
+        
+        self.jump = False
+        
+        self.dy = 0
+
+        self.total_score = 0
+        
+        self.prev_max_z = 0
+        self.should_end_game = False
+        
+        self.actions = game_config.GAME_ACTIONS
+
+        # Set when initialized...no need to reset
+        #self.task = self.createTask()
+
+        assert game_config.STARTING_REWARD >= game_config.EXISTENCE_PENALTY + game_config.SWING_PENALTY, "Penalties too high!"
 
     def createTask(self):
         if (game_config.TASK == game_config.WALKWAY):
             return Walkway()
+        elif (game_config.TASK == game_config.COMPLEX_WALKWAY):
+            return Complex_Walkway()
         else:
             print("Please set valid task in game_config")
             return None
@@ -241,6 +290,7 @@ class Player(object):
         #print ("DeepMindPlayer doAction: ", actionIndex)
         #act = self.actions[actionIndex]
         # carry out the action
-        return self.task.getReward(self) 
-        
+        r = self.task.getReward(self)
+        self.total_score += r
+        return r
         

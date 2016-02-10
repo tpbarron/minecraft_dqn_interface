@@ -55,6 +55,8 @@ class Task(object):
     def generateGameWorld(self, filename):
         print ("Must specify subtask")
         
-
-
+    def reset(self, game_counter, game_score):
+        #If complexity needs to be changed or anything else done on reset, put the code in the reset method
+        return 0
+        
                
