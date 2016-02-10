@@ -71,9 +71,9 @@ class Complex_Walkway(Task):
         # Every average_number of games check if the player has the minimal average score to level up
         if len(self.previous_scores) == self.average_number:
             average = sum(self.previous_scores) / self.average_number
-            print self.average_number,  "Game Average:", average
+            print self.average_number,  "Game average:", average
             if average >= self.level_up_score:
                 self.complexity += 1
-                print "INCREASED COMPLEXITY TO:", self.complexity
+                print "Increased complexity to:", self.complexity
                 game_config.MAXIMUM_GAME_FRAMES = 640 + self.complexity * 320
         return self.complexity
