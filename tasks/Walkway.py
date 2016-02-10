@@ -10,7 +10,6 @@ import game_config
 class Walkway(Task):
 
     def __init__(self):
-        print ("Initalizing walkway")
         super(Walkway, self).__init__()
         
     def generateGameWorld(self, filename):

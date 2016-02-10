@@ -17,7 +17,7 @@ class Task(object):
 
     
     def __init__(self):
-        print("Initalizing Task")
+        pass
         
     def saveWorld(self, locations, filename):
         o = open(game_globals.MAPS_PATH + os.sep + filename, 'w')
