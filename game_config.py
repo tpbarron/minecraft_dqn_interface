@@ -17,6 +17,9 @@ TRAIN_WINDOW_SIZE = 84
 
 TICKS_PER_SEC = 6000
 
+# the resolution of the volume
+VOLUME_DIMENSION = 50.0
+
 # Total number of game frames per episode
 MAXIMUM_GAME_FRAMES = 500
 
