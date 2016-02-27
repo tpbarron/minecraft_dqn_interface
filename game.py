@@ -500,7 +500,7 @@ class Window(pyglet.window.Window):
         return screenshot
         
 
-    def get_volume(self, side=20.0):
+    def get_volume(self, side=10.0):
         # Alternative possibility
         # Rotate pos to block vector by -player rot
         # Sight vector will just be neg z
@@ -522,49 +522,15 @@ class Window(pyglet.window.Window):
             block_vec = (blockPos[0] - agentPos[0], blockPos[1] - (agentPos[1]), blockPos[2] - agentPos[2])
             offset = side / 10.0 / 2.0
             if (self.checkPoint(block_vec, agentPos, agentRot)):
-                #points.append(block_vec)
-                x, y, z = tuple([e*side/10.0 for e in block_vec])
-                
-                #print ("vol point = ", volPoint)
-                # +49 since origin at center
-                minx = int(round(x - offset + side/2.0 - 1))
-                maxx = int(round(x + offset + side/2.0 - 1))
-                
-                miny = int(round(y - offset + side/2.0 - 1))
-                maxy = int(round(y + offset + side/2.0 - 1))
-                
-                # flip z's into the positive side
-                minz = -int(round(z + offset))
-                maxz = -int(round(z - offset))
-                
-                #print ("bounds: ", minx, maxx, miny, maxy, minz, maxz)
-                
-                for xs in range(minx, maxx, 1):
-                    for ys in range(miny, maxy, 1):
-                        for zs in range(minz, maxz, 1):
-                            if (xs >= 0 and xs < side):
-                                if (ys >= 0 and ys < side):
-                                    if (zs >= 0 and zs < side):
-                                        #print ("adding point: ", (xs, ys, zs))
-                                        #points.append((xs, ys, zs))
-                                        volume[xs][ys][zs] = 1
-                
-                                 
-            # check vertices            
-            #blockVertices = cube_vertices(blockPos[0], blockPos[1], blockPos[2], 0.5)
-            #for v in range(0, len(blockVertices), 3):
-            #    vertex = (blockVertices[v], blockVertices[v+1], blockVertices[v+2])
-            #    block_vec = (vertex[0] - agentPos[0], vertex[1] - (agentPos[1]), vertex[2] - agentPos[2])
-                
-            #    if (self.checkPoint(block_vec, agentPos, agentRot)):    
-            #        points.append(block_vec)
-                                
+                volume[blockPos[0]][blockPos[1]][blockPos[2]] = 1
+                #points.append(blockPos)
+
         #self.plot3d(points)      
         
         return volume
     
     
-    def plot3d(self, points, size=20.0):
+    def plot3d(self, points, size=10.0):
         fig = plt.figure()
         plt.ion()
         ax = fig.add_subplot(111, projection='3d')
@@ -591,9 +557,9 @@ class Window(pyglet.window.Window):
         #ax.set_xlim([-(size/2-1),(size/2)])
         #ax.set_zlim([-size-1,0])
 
-        ax.set_ylim([0, size-1])
-        ax.set_xlim([0, size-1])
-        ax.set_zlim([0, size-1])
+        ax.set_ylim([-size/2.0, size/2.0])
+        ax.set_xlim([-size/2.0, size/2.0])
+        ax.set_zlim([-size, 0])
 
         plt.show()
         raw_input("Enter: ")

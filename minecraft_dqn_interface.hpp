@@ -24,6 +24,7 @@ public:
   virtual void init(bool evaluate);
   virtual std::vector<int> get_action_set();
   virtual std::vector<uint8_t> get_volume();
+  virtual std::vector<float> get_transform();
   // NOTE: the size of the array must match the pixels in the screen shot
   virtual std::shared_ptr<std::array<uint8_t, 7056> > get_screen_as_array();
   virtual cv::Mat get_screen();
@@ -37,7 +38,7 @@ private:
   const char* moduleName = "interface";
 
   PyObject *module;
-  PyObject *py_init, *py_get_action_set, *py_get_screen, *py_get_volume, *py_act, *py_is_game_over, *py_reset;
+  PyObject *py_init, *py_get_action_set, *py_get_screen, *py_get_volume, *py_get_transform, *py_act, *py_is_game_over, *py_reset;
 
 };
 

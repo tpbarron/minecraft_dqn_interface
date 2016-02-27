@@ -56,6 +56,11 @@ void MinecraftInterface::initMethods() {
   if (!py_get_volume || !PyCallable_Check(py_get_volume)) {
     PyErr_Print();
   }
+  
+  py_get_transform = PyObject_GetAttrString(module, "get_transform");
+  if (!py_get_transform || !PyCallable_Check(py_get_transform)) {
+    PyErr_Print();
+  }
     
   py_get_screen = PyObject_GetAttrString(module, "get_screen");
   if (!py_get_screen || !PyCallable_Check(py_get_screen)) {
@@ -151,6 +156,33 @@ std::vector<uint8_t> MinecraftInterface::get_volume() {
   
   Py_DECREF(pValue);
   return volume;
+}
+
+std::vector<float> MinecraftInterface::get_transform() {
+  PyObject *pValue = PyObject_CallObject(py_get_transform, nullptr);
+  std::vector<float> transform;
+  
+  if (PyList_Check(pValue)) {
+    PyObject *iter = PyObject_GetIter(pValue);
+  
+    if (iter == nullptr) {
+      PyErr_Print();
+      exit(1);
+    }
+    
+    PyObject *item;
+    while ( (item = PyIter_Next(iter)) ) {
+      transform.push_back(static_cast<float>(PyFloat_AsDouble(item)));
+      Py_DECREF(item);
+    }
+    
+    Py_DECREF(iter);        
+  } else {
+    PyErr_Print();
+  }
+  
+  Py_DECREF(pValue);
+  return transform;
 }
 
 
@@ -301,6 +333,7 @@ int main(int argc, char *argv[]) {
   int gameItr = 0;
   while (gameItr < 2) {
     std::vector<uint8_t> volume = iface.get_volume();
+    std::vector<float> transform = iface.get_transform();
     //cv::Mat screen = iface.get_screen(gameItr, frameItr);
     bool over = iface.is_game_over();
     if (over) {
@@ -315,5 +348,5 @@ int main(int argc, char *argv[]) {
   }
   
   return 0;
-}*/
-
+}
+*/

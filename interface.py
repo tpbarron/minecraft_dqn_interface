@@ -61,6 +61,16 @@ def get_volume():
     #                print (i, j, k) #volume[i][j][k])
     #print len(list(volume.flatten()))
     return list(volume.flatten())
+    
+    
+def get_transform():
+    """
+    Return rotation and translations
+    """
+    rotation = window.player.rotation
+    translation = window.player.position
+    return rotation + translation
+    
 
 
 def act(action):
@@ -115,6 +125,8 @@ if __name__ == "__main__":
     while i < 1000:
         #img = get_screen()
         vol = get_volume()
+        transforms = get_transforms()
+        print "transforms: ", transforms
         #cv2.imwrite("image.png", img)
         over = is_game_over()
         if (over):
