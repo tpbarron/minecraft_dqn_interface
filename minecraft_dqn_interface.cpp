@@ -162,7 +162,7 @@ std::vector<float> MinecraftInterface::get_transform() {
   PyObject *pValue = PyObject_CallObject(py_get_transform, nullptr);
   std::vector<float> transform;
   
-  if (PyList_Check(pValue)) {
+  if (PyTuple_Check(pValue)) {
     PyObject *iter = PyObject_GetIter(pValue);
   
     if (iter == nullptr) {
