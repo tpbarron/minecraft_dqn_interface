@@ -11,6 +11,7 @@ class Walkway(Task):
 
     def __init__(self):
         super(Walkway, self).__init__()
+        self.length = 10
         
     def generateGameWorld(self, filename):
         locs = []
@@ -25,7 +26,7 @@ class Walkway(Task):
         i = 0
         j = 0
         block_count = 0
-        while block_count < 10:
+        while block_count < self.length:
             locations.append((i, Task.GROUND, j, "STONE"))
             #if random.random() < 0.1:
             #    locations.append((i, GROUND+1, j, "GRASS"))
@@ -42,7 +43,7 @@ class Walkway(Task):
     def generateShortEasyWalkwayWorld(self, locations):    
         # a block to start on
         locations.append((0, Task.GROUND, 0, "STONE"))
-        for i in range(100):
+        for i in range(self.length):
             locations.append((0, Task.GROUND, -i, "STONE"))
 
         return locations
@@ -63,14 +64,14 @@ class Walkway(Task):
         #print (self.position)
         if (player.position[2] < player.prev_max_z):
           player.prev_max_z = player.position[2]
-          reward = 1
+          reward = 1.0
         elif (player.position[2] > player.prev_max_z):
-          reward = -1
+          reward = -1.0
 
         if (player.position[1] < -1):
           # the player fell, end the game early
           player.should_end_game = True
-          reward = 0 #-1
+          reward = 0.0 #-1
 
         #print ("Player reward = ", reward)
         return reward

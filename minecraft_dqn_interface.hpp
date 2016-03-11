@@ -27,7 +27,7 @@ public:
   virtual std::shared_ptr<std::array<uint8_t, 7056> > get_screen_as_array();
   virtual cv::Mat get_screen();
   virtual cv::Mat get_screen(int gitr, int fitr);
-  virtual int act(int action);
+  virtual double act(int action);
   virtual bool is_game_over();
   virtual void reset();
 

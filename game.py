@@ -298,7 +298,7 @@ class Model(object):
 
         """
         start = time.clock()
-        while self.queue and time.clock() - start < 1.0 / TICKS_PER_SEC:
+        while self.queue and time.clock() - start < 1.0 / game_config.TICKS_PER_SEC:
             self._dequeue()
 
     def process_entire_queue(self):

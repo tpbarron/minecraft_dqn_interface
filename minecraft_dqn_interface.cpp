@@ -216,18 +216,17 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
 /*
  * Perform the action designated by the id
  */
-int MinecraftInterface::act(int action) {
+double MinecraftInterface::act(int action) {
   // parameter must be tuple
   // https://docs.python.org/2.0/ext/buildValue.html
   PyObject *pAction = Py_BuildValue("(i)", action);
   PyObject *pValue = PyObject_CallObject(py_act, pAction);
-  int ret = 0;
-  if (PyInt_Check(pValue)) {
-    ret = static_cast<int>(PyInt_AsLong(pValue));
+  double ret = 0;
+  if (PyFloat_Check(pValue)) {
+    ret = static_cast<double>(PyFloat_AsDouble(pValue));
   } else {
     PyErr_Print();
   }
-
   Py_DECREF(pAction);
   Py_DECREF(pValue);
   //std::cout << "minecraft interface reward = " << ret << std::endl;
