@@ -63,7 +63,7 @@ class Player(object):
         self.prev_max_z = 0
         self.should_end_game = False
         
-        self.actions = game_config.GAME_ACTIONS
+        #self.actions = game_config.GAME_ACTIONS
 
         self.task = self.createTask()
 
@@ -109,7 +109,7 @@ class Player(object):
         self.prev_max_z = 0
         self.should_end_game = False
         
-        self.actions = game_config.GAME_ACTIONS
+        #self.actions = game_config.GAME_ACTIONS
 
         # Set when initialized...no need to reset
         #self.task = self.createTask()
@@ -191,7 +191,7 @@ class Player(object):
 
         if self.jump and self.canJump():
             self.jump = False
-            self.dy = JUMP_SPEED
+            self.dy = game_globals.JUMP_SPEED
 
         if any(self.strafe):
             x, y = self.rotation
@@ -241,11 +241,12 @@ class Player(object):
             The movement of the mouse.
 
         """
-        m = 0.15
+        m = 10.0/9.0 #0.15
         x, y = self.rotation
         x, y = x + dx * m, y + -dy * m
         y = max(-90, min(90, y))
         self.rotation = (x, y)
+        #print "Rotation: ", x, y
             
             
     
@@ -271,13 +272,18 @@ class Player(object):
             return ""
             
             
-    def performAction(self, actionIndex):
+    def performAction(self, actionParam):
         """
         Perform an action by setting the agent's movement fields to the values from the action object
         NOTE: the break block action should be handled in the getReward method
         """
-        act = self.actions[actionIndex]
         
+        act = Action.Action(break_block=(actionParam[0]==1),
+                            updown_rot=actionParam[1],
+                            leftright_rot=actionParam[2],
+                            forwardback=actionParam[3],
+                            leftright=actionParam[4])
+                     
         #print ("Player perform action")
         self.strafe[0] = act.forwardbackward_walk
         self.strafe[1] = act.leftright_walk

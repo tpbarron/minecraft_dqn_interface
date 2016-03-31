@@ -11,6 +11,12 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+namespace minecraft_interface {
+
+
+constexpr auto kNumActionParams = 5;
+using ActionList = std::array<double, 5>;
+
 class MinecraftInterface {
 
 public:
@@ -27,7 +33,7 @@ public:
   virtual std::shared_ptr<std::array<uint8_t, 7056> > get_screen_as_array();
   virtual cv::Mat get_screen();
   virtual cv::Mat get_screen(int gitr, int fitr);
-  virtual double act(int action);
+  virtual double act(ActionList action);
   virtual bool is_game_over();
   virtual void reset();
 
@@ -39,5 +45,7 @@ private:
   PyObject *py_init, *py_get_action_set, *py_get_screen, *py_act, *py_is_game_over, *py_reset;
 
 };
+
+}
 
 #endif

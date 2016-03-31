@@ -49,29 +49,29 @@ def get_screen():
     return list(screen)
 
 
-def act(action):
+def act(actionParam):
     """
     Perform the desired action
     """
     #print ("python act 1")
     global window
     # first apply the action
-    window.player.performAction(action)
+    window.player.performAction(actionParam)
     #print ("python act 2")
-    update()
+    update(actionParam)
     #print ("python act 3")
     # now determine the reward from it
-    return window.player.getReward(action)
+    return float(window.player.getReward(actionParam))
 
 
-def update():
+def update(actionParam):
     """ 
     Updates the game given the currently set params
     Called from act.
     """
     global window
     dt = pyglet.clock.tick()
-    window.update(dt * 1000)
+    window.update(dt * 1000, actionParam)
     window.switch_to()
     window.dispatch_events()
     window.dispatch_event('on_draw')
@@ -110,10 +110,15 @@ if __name__ == "__main__":
             reset()
         else:
             #pass
-            r = act(2)
+            actionParams = [0,    # click
+                            .5,    # up/down rotate
+                            0,    # left/right rotate
+                            0,   # forward/back move
+                            0]    # left/right move
+            r = act(actionParams)
             total_reward += r
             print ("reward = ", r)
         i += 1
-        time.sleep(.05)
+        time.sleep(.5)
               
 

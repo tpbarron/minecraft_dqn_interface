@@ -5,6 +5,9 @@
 #include <chrono>
 #include <thread>
 
+namespace minecraft_interface {
+
+
 MinecraftInterface::MinecraftInterface(int argc, 
 				       char *argv[], 
 				       const std::string path) {
@@ -216,10 +219,15 @@ cv::Mat MinecraftInterface::get_screen(int gitr, int fitr) {
 /*
  * Perform the action designated by the id
  */
-double MinecraftInterface::act(int action) {
+double MinecraftInterface::act(ActionList action) {
   // parameter must be tuple
   // https://docs.python.org/2.0/ext/buildValue.html
-  PyObject *pAction = Py_BuildValue("(i)", action);
+  PyObject *pAction = Py_BuildValue("([f,f,f,f,f])", action[0], 
+                                                     action[1], 
+                                                     action[2], 
+                                                     action[3], 
+                                                     action[4]);
+                                                                                                          
   PyObject *pValue = PyObject_CallObject(py_act, pAction);
   double ret = 0;
   if (PyFloat_Check(pValue)) {
@@ -255,13 +263,15 @@ void MinecraftInterface::reset() {
   PyObject_CallObject(py_reset, nullptr);
 }
 
+}
+
 /*
 int main(int argc, char *argv[]) {
-  MinecraftInterface iface(argc, argv, "");	
-//  MinecraftInterface iface;	
+  minecraft_interface::MinecraftInterface iface(argc, argv, "");	
   iface.init(false);
-  iface.get_action_set();
-  iface.act(0);
+  //iface.get_action_set();
+  minecraft_interface::ActionList noop = {0.0, 0.0, 0.0, 0.0, 0.0};
+  iface.act(noop);
   
   int frameItr = 0;
   int gameItr = 0;
@@ -273,12 +283,12 @@ int main(int argc, char *argv[]) {
       iface.reset();
       gameItr++;
     } else {
-      iface.act(2);
+      minecraft_interface::ActionList fwd = {0.0, 0.0, 0.0, -1.0, 0.0};
+      iface.act(fwd);
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
     frameItr++;
   }
   
   return 0;
-}
-*/
+}*/

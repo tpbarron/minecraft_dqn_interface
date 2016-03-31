@@ -421,7 +421,7 @@ class Window(pyglet.window.Window):
         self.exclusive = exclusive
 
 
-    def update(self, dt):
+    def update(self, dt, actionParam=None):
         """ This method is scheduled to be called repeatedly by the pyglet
         clock.
 
@@ -446,10 +446,12 @@ class Window(pyglet.window.Window):
         m = 8
         dt = min(dt, 0.2)
         for _ in xrange(m):
-            self._update(dt / m)
+            self._update(dt / m, actionParam)
+        #print "Motion vec: ", self.player.get_motion_vector()
+        #print "Position: ", self.player.position
         
 
-    def _update(self, dt):
+    def _update(self, dt, actionParam=None):
         """ Private implementation of the `update()` method. This is where most
         of the motion logic lives, along with gravity and collision detection.
 
@@ -460,7 +462,12 @@ class Window(pyglet.window.Window):
 
         """
         # walking
-        speed = FLYING_SPEED if self.player.flying else game_config.WALKING_SPEED
+        multiplier = 1.0
+        if (actionParam != None):
+            # find magnitude of movement
+            #                     forward/back        left/right
+            multiplier = math.sqrt(actionParam[3]**2 + actionParam[4]**2)
+        speed = game_globals.FLYING_SPEED if self.player.flying else game_config.AGENT_WALKING_SPEED*multiplier
         d = dt * speed # distance covered this tick.
         dx, dy, dz = self.player.get_motion_vector()
         # New position in space, before accounting for gravity.
@@ -477,6 +484,7 @@ class Window(pyglet.window.Window):
         x, y, z = self.player.position
         x, y, z = self.collide((x + dx, y + dy, z + dz), game_globals.PLAYER_HEIGHT)
         self.player.position = (x, y, z)
+        
 
 
     def get_screen(self):
