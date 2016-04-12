@@ -11,7 +11,7 @@ class Walkway(Task):
 
     def __init__(self):
         super(Walkway, self).__init__()
-        self.length = 10
+        self.length = 100
         
     def generateGameWorld(self, filename):
         locs = []

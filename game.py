@@ -60,9 +60,9 @@ class Model(object):
             elif kind == "BRICK":
                 self.add_block((x, y, z), game_globals.BRICK, immediate=False)
             #self.add_block((x, y - 3, z), STONE, immediate=False)
-                
+
         f.close()
-       
+
 
 
     def hit_test(self, position, vector, max_distance=8):
@@ -147,7 +147,7 @@ class Model(object):
     def try_remove_block(self, position, immediate=True):
         if position in self.world:
             self.remove_block(position, immediate)
-        
+
 
     def check_neighbors(self, position):
         """ Check all blocks surrounding `position` and ensure their visual
@@ -343,13 +343,13 @@ class Window(pyglet.window.Window):
 
         # Number of games played
         self.game_counter = 0
-        
+
         # Number of ticks gone by in the world
         self.world_counter = 0
 
         # The label that is displayed in the top left of the canvas.
         # self.label = pyglet.text.Label('', font_name='Arial', font_size=22, bold=True,
-        #     x=20, y=self.height - 10, anchor_x='left', anchor_y='top', 
+        #     x=20, y=self.height - 10, anchor_x='left', anchor_y='top',
         #     color=(0,0,0,255))
 
         # This call schedules the `update()` method to be called
@@ -359,7 +359,7 @@ class Window(pyglet.window.Window):
         #pyglet.clock.schedule(self.update)
 
         #self.current_frame = [[.76, .67],[.88, .91]]
-        
+
         # Int flag to indicate the end of the game
         # This is set to 1 whenever the max frames are reached
         # or the player dies
@@ -384,7 +384,7 @@ class Window(pyglet.window.Window):
         world_file = "test%d.txt" % random.randrange(10)
         self.player.task.generateGameWorld(world_file)
         self.model.loadMap(world_file)
-        self.set_grayscale()       
+        self.set_grayscale()
 
     def set_grayscale(self):
         """
@@ -409,7 +409,7 @@ class Window(pyglet.window.Window):
 
     def set_player(self, player):
         self.player = player
-        
+
     def set_game_frame_limit(self, max_frames):
         self.max_frames = max_frames
 
@@ -431,11 +431,11 @@ class Window(pyglet.window.Window):
             The change in time since the last call.
 
         """
-     
+
         self.world_counter += 1
         if self.world_counter >= game_config.MAXIMUM_GAME_FRAMES:
             self.game_over = True
-     
+
         self.model.process_queue()
         sector = game_globals.sectorize(self.player.position)
         if sector != self.sector:
@@ -447,7 +447,7 @@ class Window(pyglet.window.Window):
         dt = min(dt, 0.2)
         for _ in xrange(m):
             self._update(dt / m)
-        
+
 
     def _update(self, dt):
         """ Private implementation of the `update()` method. This is where most
@@ -514,8 +514,8 @@ class Window(pyglet.window.Window):
                 im_rgb.save("screenshots/frame%08d_%08d.png" % (self.game_counter, self.world_counter/4))
 
         return screenshot
-        
-        
+
+
     def collide(self, position, height):
         """ Checks to see if the player at the given `position` and `height`
         is colliding with any blocks in the world.
@@ -563,7 +563,7 @@ class Window(pyglet.window.Window):
         return tuple(p)
 
 
-        
+
 
 
 
@@ -610,7 +610,7 @@ class Window(pyglet.window.Window):
         """
         # label
         #self.label.y = height - 10
-        
+
         # reticle
         # if self.reticle:
         #     self.reticle.delete()
@@ -652,7 +652,7 @@ class Window(pyglet.window.Window):
         x, y, z = self.player.position
         glTranslatef(-x, -y, -z)
 
-    
+
     def on_draw(self):
         """ Called by pyglet to draw the canvas."""
         self.clear()
@@ -663,8 +663,8 @@ class Window(pyglet.window.Window):
         self.set_2d()
         self.draw_labels()
         #self.draw_reticle()
-        
-        
+
+
     def draw_focused_block(self):
         """ Draw black edges around the block that is currently under the
         crosshairs.
@@ -697,7 +697,7 @@ class Window(pyglet.window.Window):
         """
         glColor3d(0, 0, 0)
         self.reticle.draw(GL_LINES)
-        
+
 
 
 
@@ -738,7 +738,7 @@ def opengl_setup():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
     setup_fog()
-    
+
     # Setup grayscale conversion color component scaling values
     glPixelTransferf(GL_RED_SCALE, 0.299)
     glPixelTransferf(GL_GREEN_SCALE, 0.587)
@@ -748,10 +748,10 @@ def opengl_setup():
 
 def main():
     window = Window(width=VIEW_WINDOW_SIZE, height=VIEW_WINDOW_SIZE, caption='MindCraft', resizable=True, vsync=False)
-    
+
     #p = Player()
     p = DeepMindPlayer()
-    
+
     window.set_player(p)
     p.setGame(window)
     world_file = "test%d.txt" % random.randrange(10)
@@ -759,7 +759,7 @@ def main():
     window.model.loadMap("maps/%s" % world_file)
 
     opengl_setup()
-    
+
     #pyglet.app.run()
     return window
 
@@ -773,5 +773,5 @@ def step(window):
     window.flip()
     #time.sleep(2)
 
-    
+
 """
