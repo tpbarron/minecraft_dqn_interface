@@ -8,9 +8,10 @@ import Action
 from tasks.Task import Task
 from tasks.Walkway import Walkway
 from tasks.Complex_Walkway import Complex_Walkway
+from tasks.Big_World import Big_World
 
 import game_config
-
+import game_globals
 
 class Player(object):
 
@@ -19,7 +20,7 @@ class Player(object):
         # A list of blocks the player can place. Hit num keys to cycle.
         #self.inventory = [BRICK, GRASS, SAND]
         self.game = None
-        
+
         # When flying gravity has no effect and speed is increased.
         self.flying = False
 
@@ -34,7 +35,7 @@ class Player(object):
         # The vertical plane rotation ranges from -90 (looking straight down) to
         # 90 (looking straight up). The horizontal rotation range is unbounded.
         self.rotation = (0, 0)
-        
+
         # Looking up/down or left/right?
         self.looking = [0, 0]
 
@@ -45,24 +46,25 @@ class Player(object):
         # otherwise. The second element is -1 when moving left, 1 when moving
         # right, and 0 otherwise.
         self.strafe = [0, 0]
-        
+
         self.jump = False
-        
+
         self.dy = 0
-        
+
         # A list of blocks the player can place. Hit num keys to cycle.
         #self.inventory = [BRICK, GRASS, SAND]
 
         # The current block the user can place. Hit num keys to cycle.
         #self.block = self.inventory[0]
-        
+
         #self.previous_reward = 0
-        
+
         self.total_score = 0
-        
+
         self.prev_max_z = 0
+        self.prev_max_y = 0
         self.should_end_game = False
-        
+
         self.actions = game_config.GAME_ACTIONS
 
         self.task = self.createTask()
@@ -73,14 +75,14 @@ class Player(object):
         # A list of blocks the player can place. Hit num keys to cycle.
         #self.inventory = [BRICK, GRASS, SAND]
         self.game = None
-        
+
         # When flying gravity has no effect and speed is increased.
         self.flying = False
-        
+
         # Current (x, y, z) position in the world, specified with floats. Note
         # that, perhaps unlike in math class, the y-axis is the vertical axis.
         self.position = (0, 0, 0)
-        
+
         # First element is rotation of the player in the x-z plane (ground
         # plane) measured from the z-axis down. The second is the rotation
         # angle from the ground plane up. Rotation is in degrees.
@@ -88,7 +90,7 @@ class Player(object):
         # The vertical plane rotation ranges from -90 (looking straight down) to
         # 90 (looking straight up). The horizontal rotation range is unbounded.
         self.rotation = (0, 0)
-        
+
         # Looking up/down or left/right?
         self.looking = [0, 0]
 
@@ -99,16 +101,17 @@ class Player(object):
         # otherwise. The second element is -1 when moving left, 1 when moving
         # right, and 0 otherwise.
         self.strafe = [0, 0]
-        
+
         self.jump = False
-        
+
         self.dy = 0
 
         self.total_score = 0
-        
+
         self.prev_max_z = 0
+        self.prev_max_y = 0
         self.should_end_game = False
-        
+
         self.actions = game_config.GAME_ACTIONS
 
         # Set when initialized...no need to reset
@@ -121,6 +124,8 @@ class Player(object):
             return Walkway()
         elif (game_config.TASK == game_config.COMPLEX_WALKWAY):
             return Complex_Walkway()
+        elif (game_config.TASK == game_config.BIG_WORLD):
+            return Big_World()
         else:
             print("Please set valid task in game_config")
             return None
@@ -149,11 +154,11 @@ class Player(object):
         return (dx, dy, dz)
 
     def canJump(self):
-        height = PLAYER_HEIGHT
+        height = game_globals.PLAYER_HEIGHT
         pad = 0.25
         p = list(self.position)
-        np = normalize(self.position)
-        for face in FACES:  # check all surrounding blocks
+        np = game_globals.normalize(self.position)
+        for face in game_globals.FACES:  # check all surrounding blocks
             for i in xrange(3):  # check each dimension independently
                 if not face[i]:
                     continue
@@ -175,7 +180,7 @@ class Player(object):
                     break
         return False
 
-    
+
     def get_motion_vector(self):
         """ Returns the current motion vector indicating the velocity of the
         player.
@@ -186,12 +191,12 @@ class Player(object):
             Tuple containing the velocity in x, y, and z respectively.
 
         """
-        
+
         self.simulate_look(0, 0, self.looking[0], self.looking[1])
 
         if self.jump and self.canJump():
             self.jump = False
-            self.dy = JUMP_SPEED
+            self.dy = game_globals.JUMP_SPEED
 
         if any(self.strafe):
             x, y = self.rotation
@@ -220,14 +225,14 @@ class Player(object):
             dy = 0.0
             dx = 0.0
             dz = 0.0
-        return (dx, dy, dz)    
+        return (dx, dy, dz)
 
     def get_foot_position(self):
         return int(self.position[0]), int(self.position[1]-1), int(self.position[2])
 
     def get_head_position(self):
         return int(self.position[0]), int(self.position[1]-1)+1, int(self.position[2])
-    
+
     #def on_mouse_motion(self, x, y, dx, dy):
     def simulate_look(self, x, y, dx, dy):
         """ Called when the player moves the mouse.
@@ -246,9 +251,9 @@ class Player(object):
         x, y = x + dx * m, y + -dy * m
         y = max(-90, min(90, y))
         self.rotation = (x, y)
-            
-            
-    
+
+
+
     def simulate_click(self):
         vector = self.get_sight_vector()
         block, previous = self.game.model.hit_test(self.position, vector)
@@ -269,28 +274,29 @@ class Player(object):
                 return "SAND"
         else:
             return ""
-            
-            
+
+
     def performAction(self, actionIndex):
         """
         Perform an action by setting the agent's movement fields to the values from the action object
         NOTE: the break block action should be handled in the getReward method
         """
         act = self.actions[actionIndex]
-        
+
         #print ("Player perform action")
         self.strafe[0] = act.forwardbackward_walk
         self.strafe[1] = act.leftright_walk
-        
+
         self.looking[0] = act.leftright_rotation
         self.looking[1] = act.updown_rotation
 
+        self.jump = act.jump
 
-    def getReward(self, actionIndex):      
+
+    def getReward(self, actionIndex):
         #print ("DeepMindPlayer doAction: ", actionIndex)
         #act = self.actions[actionIndex]
         # carry out the action
         r = self.task.getReward(self)
         self.total_score += r
         return r
-        

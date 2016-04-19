@@ -7,7 +7,7 @@ window = None
 itrCount = 0
 
 def init(evaluate):
-    """ 
+    """
     Initialize the game state
     """
     global window
@@ -28,15 +28,15 @@ def init(evaluate):
     window.model.loadMap(world_file)
     opengl_setup()
     return "Successfully initialized"
-    
-    
+
+
 def get_action_set():
     """
     Get a list of all the legal actions
     """
     return LEGAL_ACTIONS
 
-    
+
 def get_screen():
     """
     Do one step of the game state and get the current screen
@@ -65,7 +65,7 @@ def act(action):
 
 
 def update():
-    """ 
+    """
     Updates the game given the currently set params
     Called from act.
     """
@@ -76,7 +76,7 @@ def update():
     window.dispatch_events()
     window.dispatch_event('on_draw')
     window.flip()
-    
+
 
 def is_game_over():
     """
@@ -93,8 +93,8 @@ def reset():
     global window
     #itrCount = 0
     window.reset()
-    
-    
+
+
 if __name__ == "__main__":
     init(False)
     i = 0
@@ -115,5 +115,3 @@ if __name__ == "__main__":
             print ("reward = ", r)
         i += 1
         time.sleep(.05)
-              
-
