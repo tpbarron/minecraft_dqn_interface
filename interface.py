@@ -61,7 +61,7 @@ def act(action):
     update()
     #print ("python act 3")
     # now determine the reward from it
-    return window.player.getReward(action)
+    return float(window.player.getReward(action))
 
 
 def update():

@@ -9,6 +9,7 @@ from tasks.Task import Task
 from tasks.Walkway import Walkway
 from tasks.Complex_Walkway import Complex_Walkway
 from tasks.Big_World import Big_World
+from tasks.Dangerous_Walkway import Dangerous_Walkway
 
 import game_config
 import game_globals
@@ -126,6 +127,8 @@ class Player(object):
             return Complex_Walkway()
         elif (game_config.TASK == game_config.BIG_WORLD):
             return Big_World()
+        elif (game_config.TASK == game_config.DANGEROUS_WALKWAY):
+            return Dangerous_Walkway()
         else:
             print("Please set valid task in game_config")
             return None

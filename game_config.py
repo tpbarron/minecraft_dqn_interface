@@ -21,7 +21,7 @@ ANIMATION_GENERATION = True
 TICKS_PER_SEC = 6000
 
 # Total number of game frames per episode
-MAXIMUM_GAME_FRAMES = 500
+MAXIMUM_GAME_FRAMES = 2500
 
 # Agent's turning speed (per tick)
 AGENT_ROTATION_SPEED = 1.50
@@ -61,8 +61,9 @@ STARTING_REWARD = SWING_PENALTY + EXISTENCE_PENALTY
 WALKWAY = 0
 BIG_WORLD = 1
 COMPLEX_WALKWAY = 2
+DANGEROUS_WALKWAY = 3
 
-TASK = BIG_WORLD
+TASK = DANGEROUS_WALKWAY
 
 #
 # Game Actions
@@ -71,7 +72,7 @@ TASK = BIG_WORLD
 # below and update the legal actions array to define which ones are valid
 #
 
-LEGAL_ACTIONS = [0, 1, 2, 3, 4, 5, 6, 7]
+LEGAL_ACTIONS = [0, 1, 2, 3, 4, 5, 6]
 
 GAME_ACTIONS = [
     #  (break_block, updown_rot, leftright_rot, forwardback, leftright)
@@ -82,13 +83,13 @@ GAME_ACTIONS = [
     #1  Go forward
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=WALKING_SPEED, leftright=0, jump=False),
 
-    #2  Go backward and jump
-    Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=-WALKING_SPEED, leftright=0, jump=True),
+    #-2  Go backward and jump
+    #Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=-WALKING_SPEED, leftright=0, jump=True),
 
-    #3  Go backward
+    #2  Go backward
     Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=-WALKING_SPEED, leftright=0, jump=False),
 
-    #4  Rotate right
+    #3  Rotate right
     Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=0, leftright=0, jump=False),
 
     #-4  Rotate right and go forward
@@ -97,7 +98,7 @@ GAME_ACTIONS = [
     #-5  Rotate right and go backward
     #Action.Action(False, updown_rot=0.0, leftright_rot=AGENT_ROTATION_SPEED, forwardback=-1, leftright=0),
 
-    #5  Rotate left
+    #4  Rotate left
     Action.Action(False, updown_rot=0.0, leftright_rot=-AGENT_ROTATION_SPEED, forwardback=0, leftright=0, jump=False),
 
     #-7  Rotate left and go forward
@@ -139,9 +140,9 @@ GAME_ACTIONS = [
     #19 Go left
     #Action.Action(False, updown_rot=0.0, leftright_rot=0.0, forwardback=0, leftright=-WALKING_SPEED),
 
-    #6 Rotate up
+    #5 Rotate up
     Action.Action(False, updown_rot=AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0, jump=False),
 
-    #7 Rotate down
+    #6 Rotate down
     Action.Action(False, updown_rot=-AGENT_ROTATION_SPEED, leftright_rot=0.0, forwardback=0, leftright=0, jump=False)
 ]
