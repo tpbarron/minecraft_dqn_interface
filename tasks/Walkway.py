@@ -68,11 +68,21 @@ class Walkway(Task):
         elif (player.position[2] > player.prev_max_z):
           reward = -1.0
 
+        #if (player.position[1] < -1):
+        #  # the player fell, end the game early
+        #  player.should_end_game = True
+        #  reward = 0.0 #-1
+
         if (player.position[1] < -1):
-          # the player fell, end the game early
-          player.should_end_game = True
-          reward = 0.0 #-1
+            reward = -1 #0 #-1         
+        if (player.position[1] < -400):
+            player.should_end_game = True
+            player.prev_max_distance = 0
 
         #print ("Player reward = ", reward)
         return reward
+
+
+
+
 

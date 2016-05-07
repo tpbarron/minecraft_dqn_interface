@@ -5,14 +5,17 @@ import random
 
 import Action
 
-from tasks.Task import Task
-from tasks.Walkway import Walkway
-from tasks.Complex_Walkway import Complex_Walkway
-from tasks.Big_World import Big_World
-from tasks.Dangerous_Walkway import Dangerous_Walkway
+# from tasks.Task import Task
+# from tasks.Walkway import Walkway
+# from tasks.Complex_Walkway import Complex_Walkway
+# from tasks.Big_World import Big_World
+# from tasks.Dangerous_Walkway import Dangerous_Walkway
+# from tasks.TinyWalkway import TinyWalkway
+# from tasks.Path_Creation import Path_Creation
 
 import game_config
 import game_globals
+import ActionSet
 
 class Player(object):
 
@@ -66,9 +69,9 @@ class Player(object):
         self.prev_max_y = 0
         self.should_end_game = False
 
-        self.actions = game_config.GAME_ACTIONS
+        self.actions = ActionSet.GAME_ACTIONS
 
-        self.task = self.createTask()
+        self.task = game_config.TASK   
 
         assert game_config.STARTING_REWARD >= game_config.EXISTENCE_PENALTY + game_config.SWING_PENALTY, "Penalties too high!"
 
@@ -113,25 +116,12 @@ class Player(object):
         self.prev_max_y = 0
         self.should_end_game = False
 
-        self.actions = game_config.GAME_ACTIONS
+        self.actions = ActionSet.GAME_ACTIONS #game_config.GAME_ACTIONS
 
         # Set when initialized...no need to reset
         #self.task = self.createTask()
 
-        assert game_config.STARTING_REWARD >= game_config.EXISTENCE_PENALTY + game_config.SWING_PENALTY, "Penalties too high!"
-
-    def createTask(self):
-        if (game_config.TASK == game_config.WALKWAY):
-            return Walkway()
-        elif (game_config.TASK == game_config.COMPLEX_WALKWAY):
-            return Complex_Walkway()
-        elif (game_config.TASK == game_config.BIG_WORLD):
-            return Big_World()
-        elif (game_config.TASK == game_config.DANGEROUS_WALKWAY):
-            return Dangerous_Walkway()
-        else:
-            print("Please set valid task in game_config")
-            return None
+        assert game_config.STARTING_REWARD >= game_config.EXISTENCE_PENALTY + game_config.SWING_PENALTY, "Penalties too high!" 
 
     def endGameEarly(self):
         return self.should_end_game
@@ -263,20 +253,27 @@ class Player(object):
         #self.game.add_block(previous, self.block)
         if block:
             texture = self.game.model.world[block]
-            if texture == GRASS:
+            if texture == game_globals.GRASS:
                 #print "REMOVING BLOCK"
                 self.game.model.try_remove_block(block)
                 return "GRASS"
-            elif texture == STONE:
+            elif texture == game_globals.STONE:
                 return "STONE"
-            elif texture == BRICK:
+            elif texture == game_globals.BRICK:
                 self.game.model.try_remove_block(block)
                 return "BRICK"
-            elif texture == SAND:
+            elif texture == game_globals.SAND:
                 self.game.model.try_remove_block(block)
                 return "SAND"
         else:
             return ""
+
+
+    def simulate_right_click(self):
+        vector = self.get_sight_vector()
+        block, previous = self.game.model.hit_test(self.position, vector)
+        if previous:
+            self.game.model.add_block(previous)
 
 
     def performAction(self, actionIndex):
@@ -285,6 +282,7 @@ class Player(object):
         NOTE: the break block action should be handled in the getReward method
         """
         act = self.actions[actionIndex]
+        #print "ACTION: ", act
 
         #print ("Player perform action")
         self.strafe[0] = act.forwardbackward_walk
@@ -300,6 +298,6 @@ class Player(object):
         #print ("DeepMindPlayer doAction: ", actionIndex)
         #act = self.actions[actionIndex]
         # carry out the action
-        r = self.task.getReward(self)
+        r = self.task.getReward(self, actionIndex)
         self.total_score += r
         return r

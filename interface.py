@@ -1,6 +1,8 @@
 from game import *
-from game_config import *
-from game_globals import *
+
+
+#from game_config import *
+#from game_globals import *
 import time
 
 window = None
@@ -34,7 +36,8 @@ def get_action_set():
     """
     Get a list of all the legal actions
     """
-    return LEGAL_ACTIONS
+    #return LEGAL_ACTIONS
+    return window.player.task.actions
 
 
 def get_screen():

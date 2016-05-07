@@ -6,11 +6,16 @@ import random
 from collections import deque
 from Task import Task
 import game_config
+from ActionSet import *
+
+
+
 
 class Path_Creation(Task):
     def __init__(self):
-        self.complexity = 0
         self.max_complexity = 5
+        self.complexity = self.max_complexity
+
         self.average_number = 10
         self.previous_scores = deque([], self.average_number)
         self.blocks = 21
@@ -21,6 +26,12 @@ class Path_Creation(Task):
         self.previous_ticks = -50
         # Set to 3 with four frames of input
         self.wait_ticks = 3
+        
+        self.MAXIMUM_GAME_FRAMES = 500
+        
+        self.actions = [GO_FORWARD, GO_BACKWARD, ROTATE_UP, ROTATE_DOWN, CREATE_BLOCK, REMOVE_BLOCK]
+
+
         
     def generateGameWorld(self, filename):
         locs = []
@@ -85,11 +96,12 @@ class Path_Creation(Task):
         self.previous_scores.append(game_score)
         # Every average_number of games check if the player has the minimal average score to level up
         average = sum(self.previous_scores) / self.average_number
-        print self.average_number,  "Game Average:", average, "Current Complexity:", self.complexity
+        #print self.average_number,  "Game Average:", average, "Current Complexity:", self.complexity
         if len(self.previous_scores) == self.average_number and self.complexity < self.max_complexity:
             if average >= self.level_up_score:
                 self.complexity += 1
-                print "INCREASED COMPLEXITY TO:", self.complexity
+                print self.average_number,  "Game Average:", average
+                print "Increased complexity:", self.complexity
                 # If it ever creates a path, then let it level up by not changing level up score.
                 #self.level_up_score = self.gap * 4 + (self.complexity + 1) * 4
 #                game_config.MAXIMUM_GAME_FRAMES = 640 + self.complexity * 320

@@ -24,7 +24,7 @@ class Model(object):
         self.batch = pyglet.graphics.Batch()
 
         # A TextureGroup manages an OpenGL texture.
-        self.group = TextureGroup(image.load(game_config.TEXTURE_PATH).get_texture())
+        self.group = TextureGroup(image.load(game_globals.TEXTURE_PATH).get_texture())
 
         # A mapping from position to the texture of the block at that position.
         # This defines all the blocks that are currently in the world.
@@ -49,7 +49,7 @@ class Model(object):
 
     def loadMap(self, level):
         #f = open("world.txt", 'r')
-        f = open(game_config.MAPS_PATH + '/' + level, 'r')
+        f = open(game_globals.MAPS_PATH + '/' + level, 'r')
         for line in f:
             x, y, z, kind = line.split()
             x, y, z = float(x), float(y), float(z)
@@ -157,7 +157,7 @@ class Model(object):
 
         """
         x, y, z = position
-        for dx, dy, dz in FACES:
+        for dx, dy, dz in game_globals.FACES:
             key = (x + dx, y + dy, z + dz)
             if key not in self.world:
                 continue
@@ -433,7 +433,7 @@ class Window(pyglet.window.Window):
         """
 
         self.world_counter += 1
-        if self.world_counter >= game_config.MAXIMUM_GAME_FRAMES:
+        if self.world_counter >= self.player.task.MAXIMUM_GAME_FRAMES:
             self.game_over = True
 
         self.model.process_queue()
