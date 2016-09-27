@@ -113,6 +113,7 @@ if __name__ == "__main__":
     init(True)
     i = 0
     while i < 1000:
+        print "action : ", i
         #img = get_screen()
         vol = get_volume()
         #cv2.imwrite("image.png", img)
@@ -122,9 +123,9 @@ if __name__ == "__main__":
             reset()
         else:
             #pass
-            r = act(4)
+            r = act(5)
             print ("reward = ", r)
         i += 1
-        #time.sleep(.05)
+        time.sleep(.5)
               
 

@@ -500,6 +500,79 @@ class Window(pyglet.window.Window):
         return screenshot
         
 
+    def get_faces(self, num=20):
+        blocks = self.model.shown
+        agentRot = self.player.rotation
+        agentPos = self.player.position
+        
+        faces = []
+        for blockPos in blocks.keys():
+            # get all the vertices and determine if each face is visible
+            blockVertices = cube_vertices(blockPos[0], blockPos[1], blockPos[2], 0.5)
+            
+            for v in range(0, len(blockVertices), 12):
+                vertex0 = np.asarray((blockVertices[v],   blockVertices[v+1],  blockVertices[v+2]))
+                vertex1 = np.asarray((blockVertices[v+3], blockVertices[v+4],  blockVertices[v+5]))
+                vertex2 = np.asarray((blockVertices[v+6], blockVertices[v+7],  blockVertices[v+8]))
+                vertex3 = np.asarray((blockVertices[v+9], blockVertices[v+10], blockVertices[v+11]))
+                
+                vector0 = vertex0 - vertex1
+                vector1 = vertex0 - vertex2
+                
+                normal = np.cross(vector0, vector1)
+                
+                if (self.checkFace(normal, agentPos, agentRot)):    
+                    faces.append(self.unit_vector(normal))
+        
+        print faces
+            
+    
+    def checkFace(self, normal, agentPos, agentRot):
+        yAxisRot = agentRot[0]
+        xAxisRot = agentRot[1]
+        
+        # Translate normal vector to original coordinates
+        # unrotate about y axis
+        new_normal = self.rotateY(normal, math.radians(yAxisRot))
+        
+        # unrotate about x axis
+        new_normal = self.rotateX(new_normal, math.radians(xAxisRot))
+        
+        # untranslate x, y, z
+        new_normal = self.translate(new_normal, (-agentPos[0], -agentPos[1], -agentPos[2]))
+
+        # check angle between normal and (0, 0, -1) sight vector
+        angle = self.angle_between(new_normal, np.array(0, 0, -1))
+        if (angle < np.pi / 2.0 or angle > 3 * np.pi / 2.0):
+            return True
+            
+        return False
+        
+    
+    def unit_vector(self, vector):
+        """ Returns the unit vector of the vector.  """
+        return vector / np.linalg.norm(vector)
+
+    def angle_between(self, v1, v2):
+        """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+                >>> angle_between((1, 0, 0), (0, 1, 0))
+                1.5707963267948966
+                >>> angle_between((1, 0, 0), (1, 0, 0))
+                0.0
+                >>> angle_between((1, 0, 0), (-1, 0, 0))
+                3.141592653589793
+        """
+        v1_u = self.unit_vector(v1)
+        v2_u = self.unit_vector(v2)
+        angle = np.arccos(np.dot(v1_u, v2_u))
+        if np.isnan(angle):
+            if (v1_u == v2_u).all():
+                return 0.0
+            else:
+                return np.pi
+        return angle
+    
     def get_volume(self, side=20.0):
         # Alternative possibility
         # Rotate pos to block vector by -player rot
