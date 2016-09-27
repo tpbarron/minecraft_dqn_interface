@@ -500,6 +500,7 @@ class Window(pyglet.window.Window):
         return screenshot
         
 
+<<<<<<< HEAD
     def get_faces(self, num=20):
         blocks = self.model.shown
         agentRot = self.player.rotation
@@ -573,7 +574,8 @@ class Window(pyglet.window.Window):
                 return np.pi
         return angle
     
-    def get_volume(self, side=20.0):
+
+    def get_volume(self, side=VOLUME_DIMENSION):
         # Alternative possibility
         # Rotate pos to block vector by -player rot
         # Sight vector will just be neg z
@@ -632,12 +634,12 @@ class Window(pyglet.window.Window):
             #    if (self.checkPoint(block_vec, agentPos, agentRot)):    
             #        points.append(block_vec)
                                 
-        #self.plot3d(points)      
+        #self.plot3d(points)
         
         return volume
     
     
-    def plot3d(self, points, size=20.0):
+    def plot3d(self, points, size=VOLUME_DIMENSION):
         fig = plt.figure()
         plt.ion()
         ax = fig.add_subplot(111, projection='3d')
